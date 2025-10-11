@@ -1,293 +1,248 @@
+import java.lang.classfile.instruction.SwitchCase;
+import java.util.*;
 
+class Game {
+    int id;
+    String name;
+    String releaseDate;
+    int estimatedOwners;
+    float price;
+    ArrayList<String> supportedLanguages;
+    int metacriticScore;
+    float userScore;
+    int achievements;
+    ArrayList<String> publishers;
+    ArrayList<String> developers;
+    ArrayList<String> categories;
+    ArrayList<String> genres;
+    ArrayList<String> tags;
 
-import java.io.InputStream;
-import java.util.Scanner;
+    Game() {
+        this.id = 0;
+        this.name = "";
+        this.releaseDate = "";
+        this.estimatedOwners = 0;
+        this.price = 0.0f;
+        this.supportedLanguages = new ArrayList<>();
+        this.metacriticScore = -1;
+        this.userScore = -1.0f;
+        this.achievements = 0;
+        this.publishers = new ArrayList<>();
+        this.developers = new ArrayList<>();
+        this.categories = new ArrayList<>();
+        this.genres = new ArrayList<>();
+        this.tags = new ArrayList<>();
+    }
 
-import tp4.Game;
-
-import java.util.ArrayList;
+    Game(int id, String name, String releaseDate, int estimatedOwners, float price,
+            ArrayList<String> supportedLanguages, int metacriticScore, float userScore, int achievements,
+            ArrayList<String> publishers, ArrayList<String> developers,
+            ArrayList<String> categories, ArrayList<String> genres, ArrayList<String> tags) {
+        this.id = id;
+        this.name = name;
+        this.releaseDate = releaseDate;
+        this.estimatedOwners = estimatedOwners;
+        this.price = price;
+        this.supportedLanguages = supportedLanguages;
+        this.metacriticScore = metacriticScore;
+        this.userScore = userScore;
+        this.achievements = achievements;
+        this.publishers = publishers;
+        this.developers = developers;
+        this.categories = categories;
+        this.genres = genres;
+        this.tags = tags;
+    }
+}
 
 public class Main {
-    public static Scanner sc;
-    public static int contador = 0;
+    static int contador = 0;
+    private static final Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
-        InputStream is = Main.class.getResourceAsStream("games.csv");
-        if (is == null) {
-            System.out.println("Arquivo não encontrado!");
-            return;
-        }
-        sc = new Scanner(is);
-        // Contador de linhas
-        int n = 0;
         while (sc.hasNextLine()) {
-            n++;
-        }
-        // Capturando cada objeto Game
-        Game games[] = new Game[--n];
-        int i = 0;
-        while (sc.hasNextLine()) {
-            // Lendo uma linha do arquivo
-            String linha = sc.nextLine();
-            // Lendo elementos do jogo
-            char c = linha.charAt(0);
-            if (Character.isDigit(c)) {
-                int id = lerId(linha);
-                String name = lerName(linha);
-                String dataLancamento = lerDataLancamento(linha);
-                int estimativaJogadores = lerEstimativaJogadores(linha);
-                float preco = lerPreco(linha);
-                ArrayList<String> idiomasSuportadados = lerIdiomasSuportadados(linha);
-                float notaCritica = lerNotaCritica(linha);
-                float pontosUsuario = lerPontosUsuario(linha);
-                float quantidadeConquistas = lerQuantidadeConquistas(linha);
-                ArrayList<String> empresasResponsaveis = lerEmpresasResponsaveis(linha);
-                ArrayList<String> categorias = lerCategorias(linha);
-                ArrayList<String> generos = lerGeneros(linha);
-                ArrayList<String> palavraChave = lerPalavraChave(linha);
-                // Criando o objeto Game
-                games[i] = new Game(id, name, dataLancamento, estimativaJogadores, preco,
-                        idiomasSuportadados, notaCritica,
-                        pontosUsuario, quantidadeConquistas, empresasResponsaveis, categorias,
-                        generos, palavraChave);
-                i++;
-                contador = 0;
+            contador = 0;
+            String entrada = sc.nextLine();
+            if (!entrada.trim().isEmpty() && Character.isDigit(entrada.charAt(0))) {
+                int id = capturaId(entrada);
+                String name = capturaName(entrada);
+                String releaseDate = capturaReleaseDate(entrada);
+                int estimatedOwners = capturaEstimatedOwners(entrada);
+                float price = capturaPrice(entrada);
+                ArrayList<String> supportedLanguages = capturaSupportedLanguages(entrada);
+
+                // Testes
+                System.out.println(id);
+                System.out.println(name);
+                System.out.println(releaseDate);
+                System.out.println(estimatedOwners);
+                System.out.println(price);
+                System.out.print("[");
+                for(int i=0; i<supportedLanguages.size(); i++){
+                    System.out.print(supportedLanguages.get(i));
+                    if(!(i==supportedLanguages.size()-1)){
+                        System.out.print(", ");
+                    }
+                }
+                System.out.println("]");
+
             }
+
         }
-        // Imprimindo o primeiro objeto Game
-        System.out.println("ID: " + games[0].id);
-        System.out.println("Nome: " +  games[0].name);
-        System.out.println("Data de Lançamento: " +  games[0].dataLancamento);
-        System.out.println("Estimativa de Jogadores: " +  games[0].estimativaJogadores);
-        System.out.println("Preço: R$" +  games[0].preco);
-        System.out.println("Idiomas Suportados: " +  games[0].idiomasSuportadados);
-        System.out.println("Nota da Crítica: " +  games[0].notaCritica);
-        System.out.println("Pontos do Usuário: " +  games[0].pontosUsuario);
-        System.out.println("Quantidade de Conquistas: " +  games[0].quantidadeConquistas);
-        System.out.println("Empresas Responsáveis: " +  games[0].empresasResponsaveis);
-        System.out.println("Categorias: " +  games[0].categorias);
-        System.out.println("Gêneros: " +  games[0].generos);
-        System.out.println("Palavras-chave: " +  games[0].palavraChave);
         sc.close();
     }
 
-    // Ler ID
-    public static int lerId(String linha) {
+    // Capturando Id
+    static int capturaId(String jogo) {
         int id = 0;
-        while (linha.charAt(contador) != ',') {
-            id = (id * 10) + (linha.charAt(contador) - '0');
+        while (Character.isDigit(jogo.charAt(contador))) {
+            id = id * 10 + (jogo.charAt(contador) - '0');
             contador++;
         }
         return id;
     }
 
-    // Ler nomes
-    public static String lerName(String linha) {
+    // Capturando nome
+    static String capturaName(String jogo) {
         String name = "";
-        while (linha.charAt(contador) != ',') {
-            name += linha.charAt(contador);
+        while (jogo.charAt(contador) != ',') {
+            contador++;
+        }
+        contador++;
+        while (jogo.charAt(contador) != ',') {
+            name += jogo.charAt(contador);
             contador++;
         }
         return name;
     }
 
-    // Ler data de nscimento
-    public static String lerDataLancamento(String linha) {
-        String dataLancamento = "";
-        contador++;
-        String mes = "";
-        for (int j = 0; j < 3; j++) {
-            mes += linha.charAt(contador);
+    // Capturando Release Date
+    static String capturaReleaseDate(String jogo) {
+        while (jogo.charAt(contador) != '"') {
             contador++;
         }
         contador++;
-        String dia = "";
-        while (linha.charAt(contador) != ',') {
-            dia += linha.charAt(contador);
+        String dia = "", mes = "", ano = "";
+        // Pegando mês
+        for (int i = 0; i < 3; i++) {
+            mes += jogo.charAt(contador);
             contador++;
         }
-        contador++;
-        String ano = "";
-        while (linha.charAt(contador) != '"') {
-            ano += linha.charAt(contador);
+        mes = mes.trim();
+        switch (mes) {
+            case "Jan":
+                mes = "01";
+                break;
+            case "Feb":
+                mes = "02";
+                break;
+            case "Mar":
+                mes = "03";
+                break;
+            case "Apr":
+                mes = "04";
+                break;
+            case "May":
+                mes = "05";
+                break;
+            case "Jun":
+                mes = "06";
+                break;
+            case "Jul":
+                mes = "07";
+                break;
+            case "Aug":
+                mes = "08";
+                break;
+            case "Sep":
+                mes = "09";
+                break;
+            case "Oct":
+                mes = "10";
+                break;
+            case "Nov":
+                mes = "11";
+                break;
+            case "Dec":
+                mes = "12";
+                break;
+            default:
+                break;
+        }
+        // Pulando espaço
+        while (!Character.isDigit(jogo.charAt(contador)) && jogo.charAt(contador) != ',') {
             contador++;
         }
-        if (dia == "")
+        // Pegando dia
+        while (Character.isDigit(jogo.charAt(contador))) {
+            dia += jogo.charAt(contador);
+            contador++;
+        }
+        // Pulando espaço
+        while (!Character.isDigit(jogo.charAt(contador))) {
+            contador++;
+        }
+        // Pegando ano
+        while (jogo.charAt(contador) != '"') {
+            ano += jogo.charAt(contador);
+            contador++;
+        }
+        if (dia.isEmpty())
             dia = "01";
-        if (mes == "")
+        if (mes.isEmpty())
             mes = "01";
-        dataLancamento += dia + "/" + mes + "/" + ano;
-        return dataLancamento;
+        if (ano.isEmpty())
+            ano = "0000";
+        return dia + "/" + mes + "/" + ano;
     }
 
-    // Ler estimativa de jogadores
-    public static int lerEstimativaJogadores(String linha) {
-        String estimativaJogadores = "";
+    // Capturando Estimated Owners
+    static int capturaEstimatedOwners(String jogo) {
+        int estimatedOwners = 0;
+        while (jogo.charAt(contador) != ',') {
+            contador++;
+        }
         contador++;
-        while (linha.charAt(contador) != ',') {
-            if (Character.isDigit(linha.charAt(contador))) {
-                estimativaJogadores += linha.charAt(contador);
-            }
+        while (jogo.charAt(contador) != ',') {
+            estimatedOwners = estimatedOwners * 10 + (jogo.charAt(contador) - '0');
             contador++;
         }
-        return Integer.parseInt(estimativaJogadores);
+        return estimatedOwners;
     }
 
-    // ler preço
-    public static float lerPreco(String linha) {
-        String preco = "";
-        while (linha.charAt(contador) != ',') {
-            preco += linha.charAt(contador);
+    // Capturando Price
+    static float capturaPrice(String jogo) {
+        String price = "";
+        while (jogo.charAt(contador) != 'F' && !Character.isDigit(jogo.charAt(contador))) {
             contador++;
         }
-        if (preco == "Free to Play")
-            preco = "0.0";
-        return Float.parseFloat(preco);
+        while (jogo.charAt(contador) != ',') {
+            price += jogo.charAt(contador);
+            contador++;
+        }
+        if (price.equals("Free to play"))
+            return 0.0f;
+        else
+            return Float.parseFloat(price);
     }
 
-    // Ler idiomas suportados
-    public static ArrayList<String> lerIdiomasSuportadados(String linha) {
-        ArrayList<String> idiomasSuportadados = new ArrayList<String>();
-        while (linha.charAt(contador) != '[') {
-            contador++;
-        }
-        contador -= 3;
-        while (linha.charAt(contador) != ']') {
-            contador += 5;
-            String idioma = "";
-            while (linha.charAt(contador + 1) != ',' && linha.charAt(contador + 1) != ']') {
-                idioma += linha.charAt(contador);
+    // Capturano idiomas
+    // ,"['English', 'Simplified Chinese', 'Korean', 'Russian']",
+    static ArrayList capturaSupportedLanguages(String jogo) {
+        ArrayList<String> supportedLanguages = new ArrayList<>();
+        while (jogo.charAt(contador) != ']') {
+            String lingua = "";
+            while (!Character.isAlphabetic(jogo.charAt(contador))) {
                 contador++;
             }
-            idiomasSuportadados.add(idioma);
-        }
-        return idiomasSuportadados;
-    }
-
-    // Ler nota crítica
-    public static float lerNotaCritica(String linha) {
-        String notaCritica = "";
-        while (linha.charAt(contador) != ',') {
-            contador++;
-        }
-        while (linha.charAt(contador) != ',') {
-            notaCritica += linha.charAt(contador);
-            contador++;
-        }
-        if (notaCritica == "")
-            notaCritica = "-1.0";
-        return Float.parseFloat(notaCritica);
-    }
-
-    // Ler pontos do usuário
-    public static float lerPontosUsuario(String linha) {
-        String pontosUsuario = "";
-        contador++;
-        while (linha.charAt(contador) != ',') {
-            pontosUsuario += linha.charAt(contador);
-            contador++;
-        }
-        if (pontosUsuario == "" || pontosUsuario == "tbd")
-            pontosUsuario = "-1.0";
-        return Float.parseFloat(pontosUsuario);
-    }
-
-    // Ler quantidade de conquistas
-    public static float lerQuantidadeConquistas(String linha) {
-        String quantidadeConquistas = "";
-        contador++;
-        while (linha.charAt(contador) != ',') {
-            quantidadeConquistas += linha.charAt(contador);
-            contador++;
-        }
-        if (quantidadeConquistas == "")
-            quantidadeConquistas = "0.0";
-        return Float.parseFloat(quantidadeConquistas);
-    }
-
-    // Ler empresas responsáveis
-    public static ArrayList<String> lerEmpresasResponsaveis(String linha) {
-        while (contador < linha.length() && linha.charAt(contador) != ',') {
-            contador++;
-        }
-        if (contador < linha.length()) {
-            contador++;
-        }
-        ArrayList<String> empresasResponsaveis = new ArrayList<>();
-        if (contador >= linha.length()) {
-            return empresasResponsaveis;
-        }
-        boolean comAspas = linha.charAt(contador) == '"';
-        if (comAspas) {
-            contador++;
-        }
-        String campoBruto = "";
-        if (comAspas) {
-            while (contador < linha.length() && linha.charAt(contador) != '"') {
-                campoBruto += linha.charAt(contador);
-                contador++;
-            }
-            if (contador < linha.length() && linha.charAt(contador) == '"') {
-                contador++;
-            }
-        } else {
-            while (contador < linha.length() && linha.charAt(contador) != ',') {
-                campoBruto += linha.charAt(contador);
-                contador++;
-            }
-        }
-        if (!campoBruto.trim().isEmpty()) {
-            String[] partes = campoBruto.split(",");
-            for (String parte : partes) {
-                String nomeLimpo = parte.trim();
-                if (!nomeLimpo.isEmpty()) {
-                    nomeLimpo = nomeLimpo.replace("\"", "");
-                    empresasResponsaveis.add(nomeLimpo);
+            while (jogo.charAt(contador) != ',' && jogo.charAt(contador) != ']') {
+                if (Character.isAlphabetic(jogo.charAt(contador)) || jogo.charAt(contador) == ' ') {
+                    lingua += jogo.charAt(contador);
                 }
-            }
-        }
-        return empresasResponsaveis;
-    }
-
-    // Ler categorias
-    public static ArrayList<String> lerCategorias(String linha) {
-        ArrayList<String> categorias = new ArrayList<String>();
-        while (linha.charAt(++contador) != '"') {
-            String categoria = "";
-            while (linha.charAt(contador) != ',') {
-                categoria += linha.charAt(contador);
                 contador++;
             }
-            categorias.add(categoria);
+            supportedLanguages.add(lingua);
         }
-        return categorias;
-    }
-
-    // Ler gêneros
-    public static ArrayList<String> lerGeneros(String linha) {
-        ArrayList<String> generos = new ArrayList<String>();
-        while (linha.charAt(++contador) != '"') {
-            String genero = "";
-            while (linha.charAt(contador) != ',') {
-                genero += linha.charAt(contador);
-                contador++;
-            }
-            generos.add(genero);
-        }
-        return generos;
-    }
-
-    // Ler palavras-chave
-    public static ArrayList<String> lerPalavraChave(String linha) {
-        ArrayList<String> palavraChave = new ArrayList<String>();
-        while (linha.charAt(++contador) != '"') {
-            String palavra = "";
-            while (linha.charAt(contador) != ',') {
-                palavra += linha.charAt(contador);
-                contador++;
-            }
-            palavraChave.add(palavra);
-        }
-        return palavraChave;
+        return supportedLanguages;
     }
 }
