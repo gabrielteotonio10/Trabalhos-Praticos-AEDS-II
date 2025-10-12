@@ -1,6 +1,6 @@
-
 package tp4;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 
 class Game {
@@ -37,9 +37,9 @@ class Game {
     }
 
     Game(int id, String name, String releaseDate, int estimatedOwners, float price,
-         ArrayList<String> supportedLanguages, int metacriticScore, float userScore, int achievements,
-         ArrayList<String> publishers, ArrayList<String> developers,
-         ArrayList<String> categories, ArrayList<String> genres, ArrayList<String> tags) {
+            ArrayList<String> supportedLanguages, int metacriticScore, float userScore, int achievements,
+            ArrayList<String> publishers, ArrayList<String> developers,
+            ArrayList<String> categories, ArrayList<String> genres, ArrayList<String> tags) {
         this.id = id;
         this.name = name;
         this.releaseDate = releaseDate;
@@ -58,10 +58,13 @@ class Game {
 }
 
 public class Main {
+    // Variável que pula caracteres das linhas
+    static int contador = 0;
+    // Scanner
     public static Scanner sc;
-    public static int contador = 0;
 
     public static void main(String[] args) {
+        // Abrindo do arquivo
         InputStream is = null;
         try {
             is = new FileInputStream("/tmp/games.csv");
@@ -69,266 +72,326 @@ public class Main {
             System.out.println("Arquivo não encontrado!");
             return;
         }
-
         sc = new Scanner(is);
-        if (sc.hasNextLine()) sc.nextLine(); // pula cabeçalho
-
+        // Pula cabeçalho
+        if (sc.hasNextLine())
+            sc.nextLine();
+        // Array
         ArrayList<Game> gamesList = new ArrayList<>();
-
+        // Pesquisa por id
         while (sc.hasNextLine()) {
             String linha = sc.nextLine();
-            if (!linha.trim().isEmpty() && Character.isDigit(linha.charAt(0))) {
-                contador = 0;
+            // Capturando outras informações
+            int id = capturaId(linha);
+            String name = capturaName(linha);
+            String releaseDate = capturaReleaseDate(linha);
+            int estimatedOwners = capturaEstimatedOwners(linha);
+            float price = capturaPrice(linha);
+            ArrayList<String> supportedLanguages = capturaSupportedLanguages(linha);
+            int metacriticScore = capturaMetacriticScore(linha);
+            float userScore = capturaUserScore(linha);
+            int achievements = capturaAchievements(linha);
+            ArrayList<String> publishers = capturaUltimosArryays(linha);
+            ArrayList<String> developers = capturaUltimosArryays(linha);
+            ArrayList<String> categories = capturaUltimosArryays(linha);
+            ArrayList<String> genres = capturaUltimosArryays(linha);
+            ArrayList<String> tags = capturaUltimosArryays(linha);
+            // Adicionando a classe
+            Game jogo = new Game(id, name, releaseDate, estimatedOwners, price,
+                    supportedLanguages, metacriticScore, userScore, achievements,
+                    publishers, developers, categories, genres, tags);
+            gamesList.add(jogo);
+            contador = 0;
+        }
 
-                int id = lerId(linha);
-                String name = lerName(linha);
-                String releaseDate = lerDataLancamento(linha);
-                int estimatedOwners = lerEstimativaJogadores(linha);
-                float price = lerPreco(linha);
-                ArrayList<String> supportedLanguages = lerIdiomas(linha);
-                int metacriticScore = lerNotaCritica(linha);
-                float userScore = lerNotaUsuario(linha);
-                int achievements = lerConquistas(linha);
-                ArrayList<String> publishers = lerPublishers(linha);
-                ArrayList<String> developers = lerDevelopers(linha);
-                ArrayList<String> categories = lerCategories(linha);
-                ArrayList<String> genres = lerGenres(linha);
-                ArrayList<String> tags = lerTags(linha);
-
-                Game game = new Game(id, name, releaseDate, estimatedOwners, price,
-                        supportedLanguages, metacriticScore, userScore, achievements,
-                        publishers, developers, categories, genres, tags);
-                gamesList.add(game);
+        // Pegando entrada
+        sc = new Scanner(System.in);
+        String entrada;
+        entrada = sc.nextLine();
+        while (!entrada.equals("FIM")) {
+            // Pegando posição da entrada no array
+            Game jogo = new Game();
+            for (int i = 0; i < gamesList.size(); i++) {
+                if (gamesList.get(i).id == Integer.parseInt(entrada)) {
+                    jogo = gamesList.get(i);
+                    i = gamesList.size();
+                }
             }
+            // Printando entrada
+            String releaseDate = (jogo.releaseDate.charAt(1) == '/' ? "0" + jogo.releaseDate : jogo.releaseDate);
+            System.out.println("=> " + jogo.id + " ## " + jogo.name + " ## " + releaseDate
+                    + " ## " + jogo.estimatedOwners + " ## " + jogo.price
+                    + " ## " + printArray(jogo.supportedLanguages)
+                    + " ## " + jogo.metacriticScore + " ## " + jogo.userScore
+                    + " ## " + jogo.achievements
+                    + " ## " + printArray(jogo.publishers)
+                    + " ## " + printArray(jogo.developers)
+                    + " ## " + printArray(jogo.categories)
+                    + " ## " + printArray(jogo.genres)
+                    + " ## " + printArray(jogo.tags)
+                    + " ##");
+
+            // Lendo novamente
+            entrada = sc.nextLine();
         }
         sc.close();
+    }
 
-        Scanner entrada = new Scanner(System.in);
-        while (true) {
-            String linha = entrada.nextLine().trim();
-            if (linha.equalsIgnoreCase("FIM")) break;
+    // Printando o ArrayList
+    static String printArray(ArrayList<String> teste) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < teste.size(); i++) {
+            sb.append(teste.get(i));
+            if (i < teste.size() - 1)
+                sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 
-            try {
-                int idBusca = Integer.parseInt(linha);
-                Game encontrado = null;
+    // Capturando Id
+    static int capturaId(String jogo) {
+        int id = 0;
+        while (contador < jogo.length() && Character.isDigit(jogo.charAt(contador))) {
+            id = id * 10 + (jogo.charAt(contador) - '0');
+            contador++;
+        }
+        return id;
+    }
 
-                for (Game g : gamesList) {
-                    if (g.id == idBusca) {
-                        encontrado = g;
-                        break;
-                    }
-                }
+    // Capturando nome
+    static String capturaName(String jogo) {
+        String name = "";
+        while (jogo.charAt(contador) != ',' && contador < jogo.length()) {
+            contador++;
+        }
+        contador++;
+        while (jogo.charAt(contador) != ',' && contador < jogo.length()) {
+            name += jogo.charAt(contador);
+            contador++;
+        }
+        return name;
+    }
 
-                if (encontrado != null) {
-                    System.out.print("=> " + encontrado.id + " ## " + encontrado.name + " ## " +
-                            encontrado.releaseDate + " ## " + encontrado.estimatedOwners + " ## " +
-                            String.format("%.2f", encontrado.price) + " ## " + 
-                            formatarLista(encontrado.supportedLanguages) + " ## " +
-                            (encontrado.metacriticScore == -1 ? "N/A" : encontrado.metacriticScore) + " ## " +
-                            (encontrado.userScore == -1.0f ? "N/A" : String.format("%.1f", encontrado.userScore)) + " ## " +
-                            encontrado.achievements + " ## " +
-                            formatarLista(encontrado.publishers) + " ## " +
-                            formatarLista(encontrado.developers) + " ## " +
-                            formatarLista(encontrado.categories) + " ## " +
-                            formatarLista(encontrado.genres) + " ## " +
-                            formatarLista(encontrado.tags) + " ##");
-                    System.out.println();
-                } else {
-                    System.out.println("⇒ " + idBusca + " ## N/A");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Entrada inválida. Digite um número de ID ou 'FIM' para encerrar.");
+    // Capturando Release Date
+    static String capturaReleaseDate(String jogo) {
+        while (contador < jogo.length() && jogo.charAt(contador) != '"') {
+            contador++;
+        }
+        contador++;
+        String dia = "", mes = "", ano = "";
+        // Pegando mês
+        for (int i = 0; contador < jogo.length() && i < 3; i++) {
+            mes += jogo.charAt(contador);
+            contador++;
+        }
+        mes = mes.trim();
+        switch (mes) {
+            case "Jan":
+                mes = "01";
+                break;
+            case "Feb":
+                mes = "02";
+                break;
+            case "Mar":
+                mes = "03";
+                break;
+            case "Apr":
+                mes = "04";
+                break;
+            case "May":
+                mes = "05";
+                break;
+            case "Jun":
+                mes = "06";
+                break;
+            case "Jul":
+                mes = "07";
+                break;
+            case "Aug":
+                mes = "08";
+                break;
+            case "Sep":
+                mes = "09";
+                break;
+            case "Oct":
+                mes = "10";
+                break;
+            case "Nov":
+                mes = "11";
+                break;
+            case "Dec":
+                mes = "12";
+                break;
+            default:
+                break;
+        }
+        // Pulando espaço
+        while (contador < jogo.length() && !Character.isDigit(jogo.charAt(contador)) && jogo.charAt(contador) != ',') {
+            contador++;
+        }
+        // Pegando dia
+        while (contador < jogo.length() && Character.isDigit(jogo.charAt(contador))) {
+            dia += jogo.charAt(contador);
+            contador++;
+        }
+        // Pulando espaço
+        while (contador < jogo.length() && !Character.isDigit(jogo.charAt(contador))) {
+            contador++;
+        }
+        // Pegando ano
+        while (contador < jogo.length() && jogo.charAt(contador) != '"') {
+            ano += jogo.charAt(contador);
+            contador++;
+        }
+        if (dia.isEmpty())
+            dia = "01";
+        if (mes.isEmpty())
+            mes = "01";
+        if (ano.isEmpty())
+            ano = "0000";
+        return dia + "/" + mes + "/" + ano;
+    }
+
+    // Capturando Estimated Owners
+    static int capturaEstimatedOwners(String jogo) {
+        int estimatedOwners = 0;
+        while (contador < jogo.length() && jogo.charAt(contador) != ',') {
+            contador++;
+        }
+        contador++;
+        while (contador < jogo.length() && jogo.charAt(contador) != ',') {
+            estimatedOwners = estimatedOwners * 10 + (jogo.charAt(contador) - '0');
+            contador++;
+        }
+        return estimatedOwners;
+    }
+
+    // Capturando Price
+    static float capturaPrice(String jogo) {
+        String price = "";
+        while (contador < jogo.length() && !Character.isDigit(jogo.charAt(contador)) && jogo.charAt(contador) != 'F') {
+            contador++;
+        }
+        while (contador < jogo.length() && (Character.isDigit(jogo.charAt(contador)) || jogo.charAt(contador) == '.')) {
+            price += jogo.charAt(contador);
+            contador++;
+        }
+        price = price.trim();
+        if (price.isEmpty() || price.equalsIgnoreCase("Free to play")) {
+            return 0.0f;
+        }
+        price = price.replaceAll("[^0-9.]", "");
+        try {
+            return Float.parseFloat(price);
+        } catch (NumberFormatException e) {
+            return 0.0f;
+        }
+    }
+
+    // Capturando idiomas
+    static ArrayList<String> capturaSupportedLanguages(String jogo) {
+        ArrayList<String> supportedLanguages = new ArrayList<>();
+        while (contador < jogo.length() && jogo.charAt(contador) != ']') {
+            String lingua = "";
+            while (contador < jogo.length() && !Character.isAlphabetic(jogo.charAt(contador))) {
+                contador++;
             }
-        }
-        entrada.close();
-    }
-
-    // === FUNÇÕES AUXILIARES ===
-
-    public static String formatarLista(ArrayList<String> lista) {
-        if (lista.isEmpty()) return "[]";
-        return "[" + String.join(", ", lista) + "]";
-    }
-
-    public static int lerId(String linha) {
-        String num = "";
-        while (contador < linha.length() && linha.charAt(contador) != ',')
-            num += linha.charAt(contador++);
-        contador++;
-        return Integer.parseInt(num.trim());
-    }
-
-    public static String lerName(String linha) {
-        String nome = "";
-        if (contador < linha.length() && linha.charAt(contador) == '"') {
-            contador++;
-            while (contador < linha.length() && linha.charAt(contador) != '"') 
-                nome += linha.charAt(contador++);
-            contador++;
-        } else {
-            while (contador < linha.length() && linha.charAt(contador) != ',')
-                nome += linha.charAt(contador++);
-        }
-        contador++;
-        return nome.trim();
-    }
-
-    public static String lerDataLancamento(String linha) {
-        String data = "";
-        if (contador < linha.length() && linha.charAt(contador) == '"') {
-            contador++;
-            String mes = "";
-            for (int i = 0; i < 3 && contador < linha.length(); i++) 
-                mes += linha.charAt(contador++);
-            contador++;
-            String dia = "";
-            while (contador < linha.length() && Character.isDigit(linha.charAt(contador)))
-                dia += linha.charAt(contador++);
-            contador += 2;
-            String ano = "";
-            while (contador < linha.length() && linha.charAt(contador) != '"')
-                ano += linha.charAt(contador++);
-            contador++;
-            if (dia.equals("")) dia = "01";
-            String m = switch (mes) {
-                case "Jan" -> "01"; case "Feb" -> "02"; case "Mar" -> "03"; case "Apr" -> "04";
-                case "May" -> "05"; case "Jun" -> "06"; case "Jul" -> "07"; case "Aug" -> "08";
-                case "Sep" -> "09"; case "Oct" -> "10"; case "Nov" -> "11"; case "Dec" -> "12";
-                default -> "01";
-            };
-            data = dia + "/" + m + "/" + ano;
-        } else {
-            while (contador < linha.length() && linha.charAt(contador) != ',')
-                data += linha.charAt(contador++);
-        }
-        contador++;
-        return data.trim();
-    }
-
-    public static int lerEstimativaJogadores(String linha) {
-        String num = "";
-        while (contador < linha.length() && linha.charAt(contador) != ',') {
-            if (Character.isDigit(linha.charAt(contador)))
-                num += linha.charAt(contador);
-            contador++;
-        }
-        contador++;
-        return num.isEmpty() ? 0 : Integer.parseInt(num);
-    }
-
-    public static float lerPreco(String linha) {
-        String preco = "";
-        while (contador < linha.length() && linha.charAt(contador) != ',')
-            preco += linha.charAt(contador++);
-        contador++;
-        preco = preco.trim();
-        if (preco.equalsIgnoreCase("Free to Play")) return 0.0f;
-        if (preco.isEmpty()) return 0.0f;
-        try { return Float.parseFloat(preco); } catch (Exception e) { return 0.0f; }
-    }
-
-    public static ArrayList<String> lerIdiomas(String linha) {
-        ArrayList<String> idiomas = new ArrayList<>();
-        if (contador < linha.length() && linha.charAt(contador) == '"') {
-            contador++;
-            String conteudo = "";
-            while (contador < linha.length() && linha.charAt(contador) != '"')
-                conteudo += linha.charAt(contador++);
-            contador++;
-            if (conteudo.contains("[")) {
-                conteudo = conteudo.replace("[", "").replace("]", "");
-                String[] partes = conteudo.split(",");
-                for (String s : partes) {
-                    String idioma = s.replace("'", "").replace("\"", "").trim();
-                    if (!idioma.isEmpty()) idiomas.add(idioma);
+            while (contador < jogo.length() && jogo.charAt(contador) != ',' && jogo.charAt(contador) != ']') {
+                if (Character.isAlphabetic(jogo.charAt(contador)) || jogo.charAt(contador) == ' '
+                        || jogo.charAt(contador) == '-') {
+                    lingua += jogo.charAt(contador);
                 }
-            } else {
-                String idioma = conteudo.replace("'", "").replace("\"", "").trim();
-                if (!idioma.isEmpty()) idiomas.add(idioma);
+                contador++;
             }
-        } else {
-            String conteudo = "";
-            while (contador < linha.length() && linha.charAt(contador) != ',')
-                conteudo += linha.charAt(contador++);
-            String idioma = conteudo.replace("'", "").replace("\"", "").trim();
-            if (!idioma.isEmpty()) idiomas.add(idioma);
+            supportedLanguages.add(lingua);
+        }
+        return supportedLanguages;
+    }
+
+    // Capturando Metacritic Score
+    static int capturaMetacriticScore(String jogo) {
+        String metacriticScore = "";
+        while (contador < jogo.length() && jogo.charAt(contador) != ',') {
+            contador++;
         }
         contador++;
-        return idiomas;
-    }
-
-    public static int lerNotaCritica(String linha) {
-        String s = "";
-        while (contador < linha.length() && linha.charAt(contador) != ',')
-            s += linha.charAt(contador++);
-        contador++;
-        s = s.trim();
-        if (s.isEmpty()) return -1;
-        try { return Integer.parseInt(s); } catch (Exception e) { return -1; }
-    }
-
-    public static float lerNotaUsuario(String linha) {
-        String s = "";
-        while (contador < linha.length() && linha.charAt(contador) != ',')
-            s += linha.charAt(contador++);
-        contador++;
-        s = s.trim();
-        if (s.isEmpty() || s.equalsIgnoreCase("tbd")) return -1.0f;
-        try { return Float.parseFloat(s); } catch (Exception e) { return -1.0f; }
-    }
-
-    public static int lerConquistas(String linha) {
-        String s = "";
-        while (contador < linha.length() && linha.charAt(contador) != ',')
-            s += linha.charAt(contador++);
-        contador++;
-        s = s.trim();
-        if (s.isEmpty()) return 0;
-        try { return Integer.parseInt(s); } catch (Exception e) { return 0; }
-    }
-
-    public static ArrayList<String> lerPublishers(String linha) {
-        return lerCampoArray(linha);
-    }
-
-    public static ArrayList<String> lerDevelopers(String linha) {
-        return lerCampoArray(linha);
-    }
-
-    public static ArrayList<String> lerCategories(String linha) {
-        return lerCampoArray(linha);
-    }
-
-    public static ArrayList<String> lerGenres(String linha) {
-        return lerCampoArray(linha);
-    }
-
-    public static ArrayList<String> lerTags(String linha) {
-        return lerCampoArray(linha);
-    }
-
-    public static ArrayList<String> lerCampoArray(String linha) {
-        ArrayList<String> lista = new ArrayList<>();
-        if (contador >= linha.length()) return lista;
-        
-        if (linha.charAt(contador) == '"') {
+        while (contador < jogo.length() && Character.isDigit(jogo.charAt(contador))) {
+            metacriticScore += jogo.charAt(contador);
             contador++;
-            String campo = "";
-            while (contador < linha.length() && linha.charAt(contador) != '"')
-                campo += linha.charAt(contador++);
+        }
+        if (metacriticScore.isEmpty())
+            return -1;
+        else
+            return Integer.parseInt(metacriticScore);
+    }
+
+    // Capturando User Score
+    static float capturaUserScore(String jogo) {
+        String userScore = "";
+        while (contador < jogo.length() && jogo.charAt(contador) != ',') {
             contador++;
-            for (String s : campo.split(",")) {
-                String limpo = s.trim();
-                if (!limpo.isEmpty()) lista.add(limpo);
+        }
+        contador++;
+        while (contador < jogo.length() && (Character.isDigit(jogo.charAt(contador)) || jogo.charAt(contador) == '.')) {
+            userScore += jogo.charAt(contador);
+            contador++;
+        }
+        if (userScore.isEmpty())
+            return -1.0f;
+        else
+            return Float.parseFloat(userScore);
+    }
+
+    // Capturando User Score
+    static int capturaAchievements(String jogo) {
+        String achievements = "";
+        while (contador < jogo.length() && jogo.charAt(contador) != ',') {
+            contador++;
+        }
+        contador++;
+        while (contador < jogo.length() && (Character.isDigit(jogo.charAt(contador)) || jogo.charAt(contador) == '.')) {
+            achievements += jogo.charAt(contador);
+            contador++;
+        }
+        if (achievements.isEmpty())
+            return -1;
+        else
+            return Integer.parseInt(achievements);
+    }
+
+    // Capturando Últimos Arrays
+    static ArrayList<String> capturaUltimosArryays(String jogo) {
+        ArrayList<String> categoria = new ArrayList<>();
+        boolean teste = false;
+        while (contador < jogo.length() && !Character.isAlphabetic(jogo.charAt(contador))) {
+            if (jogo.charAt(contador) == '"')
+                teste = true;
+            contador++;
+        }
+        if (teste) {
+            while (contador < jogo.length() && jogo.charAt(contador) != '"') {
+                String parte = "";
+                while (contador < jogo.length() && jogo.charAt(contador) != ',' && jogo.charAt(contador) != '"') {
+                    parte += jogo.charAt(contador);
+                    contador++;
+                }
+                while (contador < jogo.length() && !Character.isAlphabetic(jogo.charAt(contador))
+                        && !Character.isDigit(jogo.charAt(contador))
+                        && jogo.charAt(contador) != '"') {
+                    contador++;
+                }
+                categoria.add(parte);
             }
         } else {
-            String campo = "";
-            while (contador < linha.length() && linha.charAt(contador) != ',')
-                campo += linha.charAt(contador++);
-            String limpo = campo.trim();
-            if (!limpo.isEmpty()) lista.add(limpo);
+            String parte = "";
+            while (contador < jogo.length() && jogo.charAt(contador) != ',') {
+                parte += jogo.charAt(contador);
+                contador++;
+            }
+            categoria.add(parte);
         }
-        if (contador < linha.length() && linha.charAt(contador) == ',') contador++;
-        return lista;
+        return categoria;
     }
 }
