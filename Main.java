@@ -70,6 +70,9 @@ public class Main {
                 int estimatedOwners = capturaEstimatedOwners(entrada);
                 float price = capturaPrice(entrada);
                 ArrayList<String> supportedLanguages = capturaSupportedLanguages(entrada);
+                int metacriticScore = capturaMetacriticScore(entrada);
+                float userScore = capturaUserScore(entrada);
+                float achievements = capturaAchievements(entrada);
 
                 // Testes
                 System.out.println(id);
@@ -78,14 +81,16 @@ public class Main {
                 System.out.println(estimatedOwners);
                 System.out.println(price);
                 System.out.print("[");
-                for(int i=0; i<supportedLanguages.size(); i++){
+                for (int i = 0; i < supportedLanguages.size(); i++) {
                     System.out.print(supportedLanguages.get(i));
-                    if(!(i==supportedLanguages.size()-1)){
+                    if (!(i == supportedLanguages.size() - 1)) {
                         System.out.print(", ");
                     }
                 }
                 System.out.println("]");
-
+                System.out.println(metacriticScore);
+                System.out.println(userScore);
+                System.out.println(achievements);
             }
 
         }
@@ -227,7 +232,6 @@ public class Main {
     }
 
     // Capturano idiomas
-    // ,"['English', 'Simplified Chinese', 'Korean', 'Russian']",
     static ArrayList capturaSupportedLanguages(String jogo) {
         ArrayList<String> supportedLanguages = new ArrayList<>();
         while (jogo.charAt(contador) != ']') {
@@ -244,5 +248,56 @@ public class Main {
             supportedLanguages.add(lingua);
         }
         return supportedLanguages;
+    }
+
+    // Capturando Metacritic Score
+    static int capturaMetacriticScore(String jogo) {
+        String metacriticScore = "";
+        while (jogo.charAt(contador) != ',') {
+            contador++;
+        }
+        contador++;
+        while (Character.isDigit(jogo.charAt(contador))) {
+            metacriticScore += jogo.charAt(contador);
+            contador++;
+        }
+        if (metacriticScore.isEmpty())
+            return -1;
+        else
+            return Integer.parseInt(metacriticScore);
+    }
+
+    // Capturando User Score
+    static float capturaUserScore(String jogo) {
+        String userScore = "";
+        while (jogo.charAt(contador) != ',') {
+            contador++;
+        }
+        contador++;
+        while (Character.isDigit(jogo.charAt(contador)) || jogo.charAt(contador) == '.') {
+            userScore += jogo.charAt(contador);
+            contador++;
+        }
+        if (userScore.isEmpty())
+            return -1.0f;
+        else
+            return Float.parseFloat(userScore);
+    }
+
+    // Capturando User Score
+    static float capturaAchievements(String jogo) {
+        String achievements = "";
+        while (jogo.charAt(contador) != ',') {
+            contador++;
+        }
+        contador++;
+        while (Character.isDigit(jogo.charAt(contador)) || jogo.charAt(contador) == '.') {
+            achievements += jogo.charAt(contador);
+            contador++;
+        }
+        if (achievements.isEmpty())
+            return -1.0f;
+        else
+            return Float.parseFloat(achievements);
     }
 }
