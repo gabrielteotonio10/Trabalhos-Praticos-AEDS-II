@@ -140,13 +140,13 @@ public class Main {
     // Printando o ArrayList
     static String printArray(ArrayList<String> teste) {
         StringBuilder sb = new StringBuilder();
-        sb.append("[");
+        if(teste.size() > 0) sb.append("[");
         for (int i = 0; i < teste.size(); i++) {
             sb.append(teste.get(i));
             if (i < teste.size() - 1)
                 sb.append(", ");
         }
-        sb.append("]");
+        if(teste.size() > 0) sb.append("]");
         return sb.toString();
     }
 
@@ -361,11 +361,11 @@ public class Main {
             return Integer.parseInt(achievements);
     }
 
-    // Capturando Últimos Arrays
+    // Capturando Últimos Arrays  [505 Games]
     static ArrayList<String> capturaUltimosArryays(String jogo) {
         ArrayList<String> categoria = new ArrayList<>();
         boolean teste = false;
-        while (contador < jogo.length() && !Character.isAlphabetic(jogo.charAt(contador))) {
+        while (contador < jogo.length() && !Character.isAlphabetic(jogo.charAt(contador)) && !Character.isDigit(jogo.charAt(contador))) {
             if (jogo.charAt(contador) == '"')
                 teste = true;
             contador++;
