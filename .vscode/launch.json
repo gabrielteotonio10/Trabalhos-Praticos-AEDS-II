@@ -3,6 +3,27 @@
   "configurations": [
     {
       "type": "java",
+      "name": "HeapSort",
+      "request": "launch",
+      "mainClass": "tp5.HeapSort",
+      "projectName": "Trabalhos-Praticos-AEDS-II_e3243a9b"
+    },
+    {
+      "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "tp4.Main",
+      "projectName": "Trabalhos-Praticos-AEDS-II_e3243a9b"
+    },
+    {
+      "type": "java",
+      "name": "PesquisaBinaria",
+      "request": "launch",
+      "mainClass": "tp5.PesquisaBinaria",
+      "projectName": "Trabalhos-Praticos-AEDS-II_e3243a9b"
+    },
+    {
+      "type": "java",
       "name": "Main",
       "request": "launch",
       "mainClass": "Main",
