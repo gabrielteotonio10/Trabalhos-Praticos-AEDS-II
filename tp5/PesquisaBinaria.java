@@ -1,12 +1,16 @@
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
 
 class GamePesquisado {
     String name;
+
     GamePesquisado() {
         this.name = "";
     }
+
     GamePesquisado(String name) {
         this.name = name;
     }
@@ -14,35 +18,56 @@ class GamePesquisado {
 
 public class PesquisaBinaria {
     public static Scanner sc = new Scanner(System.in);
+    // Variáveis para o log
+    private static final String MATRICULA = "885732";
+    private static long tempoExecucao = 0;
+    private static int numComparacoes = 0;
 
     public static void main(String[] args) {
+        long inicio = System.currentTimeMillis();
+
         // Criando vetor geral
         String linha;
+        int tamanho = 0;
+        String ids[] = new String[0];
         linha = sc.nextLine();
-        ArrayList<String> ids = new ArrayList<>();
         while (!linha.equals("FIM")) {
-            ids.add(linha);
+            tamanho++;
+            String aux[] = ids;
+            ids = new String[tamanho];
+            for (int i = 0; i < tamanho - 1; i++) {
+                ids[i] = aux[i];
+            }
+            ids[tamanho - 1] = linha;
+            aux = null;
             linha = sc.nextLine();
         }
         // Criando objeto com ids digitados
-        ArrayList<GamePesquisado> gamesList = CriandoObjetos.objetos(ids);
-        // Oordenando o ArrayList
-        if (!gamesList.isEmpty())
-            oordenando(gamesList, 0, gamesList.size() - 1);
+        GamePesquisado gamesList[] = CriandoObjetos.objetos(tamanho, ids);
+
+        // Ordenando o vetor
+        if (gamesList != null) {
+            oordenando(gamesList, 0, gamesList.length - 1);
+        }
+
         // Vendo se os nomes digitados são presentes
         linha = sc.nextLine();
         while (!linha.equals("FIM")) {
             boolean achou = false;
-            int dir = gamesList.size() - 1, esq = 0, meio = 0;
+            int dir = gamesList.length - 1, esq = 0, meio = 0;
             while (esq <= dir) {
                 meio = (esq + dir) / 2;
-                if (linha.equals(gamesList.get(meio).name)) {
+                numComparacoes++; 
+                if (linha.equals(gamesList[meio].name)) {
                     achou = true;
                     esq = dir + 1;
-                } else if (linha.compareTo(gamesList.get(meio).name) > 0) {
-                    esq = meio + 1;
                 } else {
-                    dir = meio - 1;
+                    numComparacoes++; 
+                    if (linha.compareTo(gamesList[meio].name) > 0) {
+                        esq = meio + 1;
+                    } else {
+                        dir = meio - 1;
+                    }
                 }
             }
             if (achou)
@@ -51,20 +76,42 @@ public class PesquisaBinaria {
                 System.out.println(" NAO");
             linha = sc.nextLine();
         }
+
         // Fechando o scanner
         sc.close();
+
+        // Cálculo e gravação do log
+        long fim = System.currentTimeMillis();
+        tempoExecucao = fim - inicio;
+        escreverLog();
     }
 
-    // Oordenando o array de String com QuickSort
-    static void oordenando(ArrayList<GamePesquisado> gameList, int esq, int dir) {
+
+    private static void escreverLog() {
+        try (FileWriter logWriter = new FileWriter(MATRICULA + "_binaria.txt")) {
+            String logLine = MATRICULA + "\t" + tempoExecucao + "\t" + numComparacoes + "\n";
+            logWriter.write(logLine);
+        } catch (IOException e) {
+            // Em um ambiente real, você faria um tratamento de erro mais robusto
+            System.err.println("Erro ao escrever o arquivo de log: " + e.getMessage());
+        }
+    }
+
+    // Oordenando o array de GamePesquisado com QuickSort (pela chave name)
+    static void oordenando(GamePesquisado gameList[], int esq, int dir) {
         int i = esq, j = dir;
         int meio = (dir + esq) / 2;
-        String pivo = gameList.get(meio).name;
+        String pivo = gameList[meio].name;
         while (i <= j) {
-            while (gameList.get(i).name.compareTo(pivo) < 0)
+
+            while (gameList[i].name.compareTo(pivo) < 0) {
+                // numComparacoes++; // Descomente para contar comparações da ordenação
                 i++;
-            while (gameList.get(j).name.compareTo(pivo) > 0)
+            }
+            while (gameList[j].name.compareTo(pivo) > 0) {
+                // numComparacoes++; // Descomente para contar comparações da ordenação
                 j--;
+            }
             if (i <= j) {
                 swap(gameList, i, j);
                 i++;
@@ -78,10 +125,10 @@ public class PesquisaBinaria {
     }
 
     // Trocando posições
-    static void swap(ArrayList<GamePesquisado> gameList, int i, int j) {
-        GamePesquisado aux = gameList.get(i);
-        gameList.set(i, gameList.get(j));
-        gameList.set(j, aux);
+    static void swap(GamePesquisado gameList[], int i, int j) {
+        GamePesquisado aux = gameList[i];
+        gameList[i] = gameList[j];
+        gameList[j] = aux;
     }
 }
 
@@ -90,57 +137,64 @@ class CriandoObjetos {
     static int contador = 0;
     // Scanner
     public static Scanner sc = new Scanner(System.in);
-    // Ids de pesquisa
-    static ArrayList<String> ids = new ArrayList<>();
 
-    static ArrayList<GamePesquisado> objetos(ArrayList<String> idArray) {
-        ids = idArray;
-        // Array
-        ArrayList<GamePesquisado> gamesList = new ArrayList<>();
+    static GamePesquisado[] objetos(int tamanho, String ids[]) {
+        GamePesquisado gameList[] = new GamePesquisado[tamanho];
         // Abrindo do arquivo
         InputStream is = null;
         try {
             java.io.File arquivo = new java.io.File("/tmp/games.csv");
             if (!arquivo.exists()) {
-                System.out.println("Arquivo 'games.csv' não encontrado na pasta do projeto!");
-                return gamesList;
+                System.out.println("Arquivo 'games.csv' não encontrado em /tmp!");
+                return new GamePesquisado[0]; // Retorna vetor vazio se o arquivo não existir
             }
             is = new FileInputStream(arquivo);
         } catch (Exception e) {
             System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
-            return gamesList;
+            return new GamePesquisado[0]; // Retorna vetor vazio em caso de erro
         }
 
-        sc = new Scanner(is);
+        Scanner scArquivo = new Scanner(is); // Usa um Scanner local para o arquivo
         // Pula cabeçalho
-        if (sc.hasNextLine())
-            sc.nextLine();
+        if (scArquivo.hasNextLine())
+            scArquivo.nextLine();
         // Pesquisa por id
-        while (sc.hasNextLine() && ids.size() > 0) {
-            String linha = sc.nextLine();
+        int cont = 0;
+        int idProcurado;
+        String linha;
+        while (scArquivo.hasNextLine() && cont < tamanho) {
+            linha = scArquivo.nextLine();
             // Capturando outras informações
             int id = capturaId(linha);
             String name = capturaName(linha);
-            if (igualId(id)) {
+            if ((idProcurado = igualId(ids, id)) != -1) {
                 GamePesquisado jogo = new GamePesquisado(name);
-                gamesList.add(jogo);
+                gameList[cont] = jogo;
+                cont++;
+
+                ids[idProcurado] = null; // Marca como usado
             }
-            // Adicionando a classe
             contador = 0;
         }
-        sc.close();
-        return gamesList;
+        scArquivo.close();
+        return gameList;
     }
 
-    // Vendo se id é igual
-    static boolean igualId(int id) {
-        for (int i = 0; i < ids.size(); i++) {
-            if (Integer.parseInt(ids.get(i)) == id) {
-                ids.remove(i);
-                return true;
+    // Vendo se id é igual - Retorna o índice do id no vetor ids ou -1 se não
+    // encontrar.
+    static int igualId(String ids[], int id) {
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i] != null) { // Verifica se o ID não foi marcado como usado
+                try {
+                    if (Integer.parseInt(ids[i]) == id) {
+                        return i;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignora IDs inválidos que não são números inteiros
+                }
             }
         }
-        return false;
+        return -1;
     }
 
     // Capturando Id
@@ -157,12 +211,23 @@ class CriandoObjetos {
     static String capturaName(String jogo) {
         String name = "";
         while (contador < jogo.length() && jogo.charAt(contador) != ',') {
-            contador++;
+            contador++; // Pula até a primeira vírgula (depois do ID)
         }
-        contador++;
-        while (contador < jogo.length() && jogo.charAt(contador) != ',') {
-            name += jogo.charAt(contador);
-            contador++;
+        contador++; // Pula a vírgula
+        // Lida com nomes entre aspas duplas, se houver
+        if (contador < jogo.length() && jogo.charAt(contador) == '"') {
+            contador++; // Pula as aspas de abertura
+            while (contador < jogo.length() && jogo.charAt(contador) != '"') {
+                name += jogo.charAt(contador);
+                contador++;
+            }
+            contador++; // Pula as aspas de fechamento
+        } else {
+            // Captura o nome até a próxima vírgula
+            while (contador < jogo.length() && jogo.charAt(contador) != ',') {
+                name += jogo.charAt(contador);
+                contador++;
+            }
         }
         return name;
     }

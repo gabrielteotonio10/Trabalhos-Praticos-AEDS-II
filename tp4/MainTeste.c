@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <time.h>
-
 //Constantes para tamanhos de buffers
 #define MAX_LINE_SIZE 4096
 #define MAX_FIELD_SIZE 512
@@ -33,10 +31,6 @@ typedef struct {
     int tagsCount;
 } Game;
 
-// Variáveis globais para contagem
-int comparacoes = 0;
-int movimentacoes = 0;
-
 void parseAndLoadGame(Game* game, char* line);
 void printGame(Game* game);
 void freeGame(Game* game);
@@ -45,9 +39,7 @@ char** splitString(const char* str, char delimiter, int* count);
 char* trim(char* str);
 char* formatDate(char* dateStr);
 void printStringArray(char** arr, int count);
-void selectionSort(Game* games, int n);
-void swap(Game* a, Game* b);
-void criarLog(const char* matricula, int comp, int mov, double tempo);
+
 
 //Lógica Principal
 int main() {
@@ -92,9 +84,6 @@ int main() {
 
     // Etapa 3: Ler IDs da entrada padrão e buscar
     char inputId[MAX_FIELD_SIZE];
-    Game* gamesParaOrdenar = (Game*) malloc(sizeof(Game) * gameCount);
-    int countParaOrdenar = 0;
-    
     while (fgets(inputId, MAX_FIELD_SIZE, stdin) != NULL) {
         inputId[strcspn(inputId, "\n")] = 0; // Remove a quebra de linha
         if (strcmp(inputId, "FIM") == 0) {
@@ -104,32 +93,13 @@ int main() {
         int targetId = atoi(inputId);
         for (i = 0; i < gameCount; i++) {
             if (allGames[i].id == targetId) {
-                // Copia o jogo encontrado para o array de ordenação
-                gamesParaOrdenar[countParaOrdenar] = allGames[i];
-                countParaOrdenar++;
+                printGame(&allGames[i]);
                 break;
             }
         }
     }
 
-    // Etapa 4: Ordenar os jogos pelo nome usando Selection Sort
-    clock_t inicio = clock();
-    selectionSort(gamesParaOrdenar, countParaOrdenar);
-    clock_t fim = clock();
-    double tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
-
-    // Etapa 5: Imprimir jogos ordenados
-    for (i = 0; i < countParaOrdenar; i++) {
-        printGame(&gamesParaOrdenar[i]);
-    }
-
-    // Etapa 6: Criar arquivo de log
-    criarLog("885732", comparacoes, movimentacoes, tempo);
-
-    // Etapa 7: Liberar toda a memória alocada
-    // Não liberamos os jogos individuais aqui pois eles são cópias dos jogos originais
-    free(gamesParaOrdenar);
-    
+    // Etapa 4: Liberar toda a memória alocada
     for (i = 0; i < gameCount; i++) {
         freeGame(&allGames[i]);
     }
@@ -138,42 +108,8 @@ int main() {
     return 0;
 }
 
-// Implementação do Selection Sort
-void selectionSort(Game* games, int n) {
-    int i, j, min_idx;
-    
-    for (i = 0; i < n - 1; i++) {
-        min_idx = i;
-        for (j = i + 1; j < n; j++) {
-            comparacoes++;
-            if (strcmp(games[j].name, games[min_idx].name) < 0) {
-                min_idx = j;
-            }
-        }
-        
-        if (min_idx != i) {
-            swap(&games[min_idx], &games[i]);
-            movimentacoes += 3; // Cada swap conta como 3 movimentações
-        }
-    }
-}
 
-// Função para trocar dois jogos
-void swap(Game* a, Game* b) {
-    Game temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-// Função para criar arquivo de log
-void criarLog(const char* matricula, int comp, int mov, double tempo) {
-    FILE* logFile = fopen("suamatricula_selecao.txt", "w");
-    if (logFile != NULL) {
-        fprintf(logFile, "%s\t%d\t%d\t%f\n", matricula, comp, mov, tempo);
-        fclose(logFile);
-    }
-}
-
+//Implementação das Funções
 // Função que preenche uma struct Game a partir de uma linha do CSV
 void parseAndLoadGame(Game* game, char* line) {
     int pos = 0;

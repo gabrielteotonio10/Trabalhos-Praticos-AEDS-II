@@ -45,9 +45,12 @@ char** splitString(const char* str, char delimiter, int* count);
 char* trim(char* str);
 char* formatDate(char* dateStr);
 void printStringArray(char** arr, int count);
-void selectionSort(Game* games, int n);
+void quicksort(Game* games, int esq, int dir);
+int partition(Game* games, int esq, int dir);
 void swap(Game* a, Game* b);
+int compareGames(Game* a, Game* b);
 void criarLog(const char* matricula, int comp, int mov, double tempo);
+void parseDate(const char* dateStr, int* day, int* month, int* year);
 
 //Lógica Principal
 int main() {
@@ -112,9 +115,9 @@ int main() {
         }
     }
 
-    // Etapa 4: Ordenar os jogos pelo nome usando Selection Sort
+    // Etapa 4: Ordenar os jogos pela data de lançamento usando Quicksort
     clock_t inicio = clock();
-    selectionSort(gamesParaOrdenar, countParaOrdenar);
+    quicksort(gamesParaOrdenar, 0, countParaOrdenar - 1);
     clock_t fim = clock();
     double tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
 
@@ -124,7 +127,7 @@ int main() {
     }
 
     // Etapa 6: Criar arquivo de log
-    criarLog("885732", comparacoes, movimentacoes, tempo);
+    criarLog("SUA_MATRICULA", comparacoes, movimentacoes, tempo);
 
     // Etapa 7: Liberar toda a memória alocada
     // Não liberamos os jogos individuais aqui pois eles são cópias dos jogos originais
@@ -138,24 +141,41 @@ int main() {
     return 0;
 }
 
-// Implementação do Selection Sort
-void selectionSort(Game* games, int n) {
-    int i, j, min_idx;
+// Função para converter string de data em componentes numéricos
+void parseDate(const char* dateStr, int* day, int* month, int* year) {
+    sscanf(dateStr, "%d/%d/%d", day, month, year);
+}
+
+// Função de comparação entre dois jogos
+int compareGames(Game* a, Game* b) {
+    comparacoes++;
     
-    for (i = 0; i < n - 1; i++) {
-        min_idx = i;
-        for (j = i + 1; j < n; j++) {
-            comparacoes++;
-            if (strcmp(games[j].name, games[min_idx].name) < 0) {
-                min_idx = j;
-            }
-        }
-        
-        if (min_idx != i) {
-            swap(&games[min_idx], &games[i]);
-            movimentacoes += 3; // Cada swap conta como 3 movimentações
-        }
+    // Parse das datas
+    int dayA, monthA, yearA;
+    int dayB, monthB, yearB;
+    
+    parseDate(a->releaseDate, &dayA, &monthA, &yearA);
+    parseDate(b->releaseDate, &dayB, &monthB, &yearB);
+    
+    // Compara primeiro pelo ano
+    if (yearA != yearB) {
+        return yearA - yearB;
     }
+    
+    // Em caso de empate no ano, compara pelo mês
+    if (monthA != monthB) {
+        return monthA - monthB;
+    }
+    
+    // Em caso de empate no mês, compara pelo dia
+    if (dayA != dayB) {
+        return dayA - dayB;
+    }
+    
+    // Em caso de empate na data completa, compara pelo ID
+    if (a->id < b->id) return -1;
+    if (a->id > b->id) return 1;
+    return 0;
 }
 
 // Função para trocar dois jogos
@@ -163,16 +183,44 @@ void swap(Game* a, Game* b) {
     Game temp = *a;
     *a = *b;
     *b = temp;
+    movimentacoes += 3; // Cada swap conta como 3 movimentações
+}
+
+// Função de partição do Quicksort
+int partition(Game* games, int esq, int dir) {
+    Game pivo = games[dir];
+    int i = esq - 1;
+    
+    for (int j = esq; j < dir; j++) {
+        if (compareGames(&games[j], &pivo) <= 0) {
+            i++;
+            swap(&games[i], &games[j]);
+        }
+    }
+    
+    swap(&games[i + 1], &games[dir]);
+    return i + 1;
+}
+
+// Implementação do Quicksort
+void quicksort(Game* games, int esq, int dir) {
+    if (esq < dir) {
+        int indicePivo = partition(games, esq, dir);
+        quicksort(games, esq, indicePivo - 1);
+        quicksort(games, indicePivo + 1, dir);
+    }
 }
 
 // Função para criar arquivo de log
 void criarLog(const char* matricula, int comp, int mov, double tempo) {
-    FILE* logFile = fopen("suamatricula_selecao.txt", "w");
+    FILE* logFile = fopen("suamatricula_quicksort.txt", "w");
     if (logFile != NULL) {
         fprintf(logFile, "%s\t%d\t%d\t%f\n", matricula, comp, mov, tempo);
         fclose(logFile);
     }
 }
+
+// Resto das funções permanece igual...
 
 // Função que preenche uma struct Game a partir de uma linha do CSV
 void parseAndLoadGame(Game* game, char* line) {
@@ -214,12 +262,45 @@ void printGame(Game* game) {
         formattedDate[0] = '0';
     }
 
-    printf("=> %d ## %s ## %s ## %d ## %.2f ## ", 
-        game->id, game->name, formattedDate, game->estimatedOwners, game->price);
+    // Formata price para remover zeros desnecessários
+    char priceStr[16];
+    if (game->price == 0.0f) {
+        strcpy(priceStr, "0.0");  // Mudei de "0.00" para "0.0"
+    } else {
+        sprintf(priceStr, "%.2f", game->price);
+        
+        // Remove zeros desnecessários no final
+        char *dot = strchr(priceStr, '.');
+        if (dot != NULL) {
+            char *end = priceStr + strlen(priceStr) - 1;
+            
+            // Remove zeros à direita
+            while (end > dot && *end == '0') {
+                *end = '\0';
+                end--;
+            }
+            
+            // Remove o ponto decimal se não houver dígitos após
+            if (end == dot) {
+                *dot = '\0';
+            }
+        }
+    }
+
+    // Formata userScore para mostrar 0.0 quando for 0
+    char userScoreStr[16];
+    if (game->userScore == 0.0f) {
+        strcpy(userScoreStr, "0.0");
+    } else {
+        sprintf(userScoreStr, "%.1f", game->userScore);
+    }
+
+    printf("=> %d ## %s ## %s ## %d ## %s ## ", 
+        game->id, game->name, formattedDate, game->estimatedOwners, priceStr);
     printStringArray(game->supportedLanguages, game->supportedLanguagesCount);
-    printf(" ## %d ## %.1f ## %d ## ", 
+    printf(" ## %d ## %s ## %d ## ", 
         game->metacriticScore == 0 ? -1 : game->metacriticScore, 
-        game->userScore == 0 ? -1.0f : game->userScore, 
+        userScoreStr, 
         game->achievements);
     printStringArray(game->publishers, game->publishersCount);
     printf(" ## ");

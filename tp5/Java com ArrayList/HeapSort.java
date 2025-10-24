@@ -1,15 +1,6 @@
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Scanner;
-
-class NoArrayList {
-    public static final int MAX_GAMES = 500;
-    public static final int MAX_INNER_ARRAY = 50;
-    public static final int MAX_IDS = 100;
-}
+import java.util.*;
 
 class Game {
     int id;
@@ -17,21 +8,15 @@ class Game {
     String releaseDate;
     int estimatedOwners;
     float price;
-    String[] supportedLanguages;
-    int supportedLanguagesCount;
+    ArrayList<String> supportedLanguages;
     int metacriticScore;
     float userScore;
     int achievements;
-    String[] publishers;
-    int publishersCount;
-    String[] developers;
-    int developersCount;
-    String[] categories;
-    int categoriesCount;
-    String[] genres;
-    int genresCount;
-    String[] tags;
-    int tagsCount;
+    ArrayList<String> publishers;
+    ArrayList<String> developers;
+    ArrayList<String> categories;
+    ArrayList<String> genres;
+    ArrayList<String> tags;
 
     Game() {
         this.id = 0;
@@ -39,107 +24,70 @@ class Game {
         this.releaseDate = "";
         this.estimatedOwners = 0;
         this.price = 0.0f;
-        this.supportedLanguages = new String[NoArrayList.MAX_INNER_ARRAY];
-        this.supportedLanguagesCount = 0;
+        this.supportedLanguages = new ArrayList<>();
         this.metacriticScore = -1;
         this.userScore = -1.0f;
         this.achievements = 0;
-        this.publishers = new String[NoArrayList.MAX_INNER_ARRAY];
-        this.publishersCount = 0;
-        this.developers = new String[NoArrayList.MAX_INNER_ARRAY];
-        this.developersCount = 0;
-        this.categories = new String[NoArrayList.MAX_INNER_ARRAY];
-        this.categoriesCount = 0;
-        this.genres = new String[NoArrayList.MAX_INNER_ARRAY];
-        this.genresCount = 0;
-        this.tags = new String[NoArrayList.MAX_INNER_ARRAY];
-        this.tagsCount = 0;
+        this.publishers = new ArrayList<>();
+        this.developers = new ArrayList<>();
+        this.categories = new ArrayList<>();
+        this.genres = new ArrayList<>();
+        this.tags = new ArrayList<>();
     }
 
     Game(int id, String name, String releaseDate, int estimatedOwners, float price,
-            String[] supportedLanguages, int supportedLanguagesCount, int metacriticScore, float userScore,
-            int achievements,
-            String[] publishers, int publishersCount, String[] developers, int developersCount,
-            String[] categories, int categoriesCount, String[] genres, int genresCount, String[] tags, int tagsCount) {
+            ArrayList<String> supportedLanguages, int metacriticScore, float userScore, int achievements,
+            ArrayList<String> publishers, ArrayList<String> developers,
+            ArrayList<String> categories, ArrayList<String> genres, ArrayList<String> tags) {
         this.id = id;
         this.name = name;
         this.releaseDate = releaseDate;
         this.estimatedOwners = estimatedOwners;
         this.price = price;
-
-        // Copiando arrays
         this.supportedLanguages = supportedLanguages;
-        this.supportedLanguagesCount = supportedLanguagesCount;
-        this.publishers = publishers;
-        this.publishersCount = publishersCount;
-        this.developers = developers;
-        this.developersCount = developersCount;
-        this.categories = categories;
-        this.categoriesCount = categoriesCount;
-        this.genres = genres;
-        this.genresCount = genresCount;
-        this.tags = tags;
-        this.tagsCount = tagsCount;
-
         this.metacriticScore = metacriticScore;
         this.userScore = userScore;
         this.achievements = achievements;
-    }
-}
-
-class HLogMetrics {
-    public static long comparacoes = 0;
-    public static long movimentacoes = 0;
-    public static long tempoExecucaoMs = 0;
-    public static final String MATRICULA = "885732";
-
-    public static void gerarLog() {
-        try {
-            FileWriter arq = new FileWriter(MATRICULA + "_heapsort.txt");
-            PrintWriter gravarArq = new PrintWriter(arq);
-            gravarArq.println(MATRICULA + "\t" + comparacoes + "\t" + movimentacoes + "\t" + tempoExecucaoMs);
-            gravarArq.close();
-        } catch (IOException e) {
-            System.out.println("Erro ao criar log: " + e.getMessage());
-        }
+        this.publishers = publishers;
+        this.developers = developers;
+        this.categories = categories;
+        this.genres = genres;
+        this.tags = tags;
     }
 }
 
 public class HeapSort {
+    // Scanner
     public static Scanner sc;
 
     public static void main(String[] args) {
+        // Pegando entrada
         sc = new Scanner(System.in);
-        String entrada = sc.nextLine();
-
-        String[] ids = new String[NoArrayList.MAX_IDS];
-        int idsTamanho = 0;
-
-        while (!entrada.equals("FIM") && idsTamanho < ids.length) {
-            if (idsTamanho < ids.length) {
-                ids[idsTamanho++] = entrada;
-            }
+        String entrada;
+        entrada = sc.nextLine();
+        // Criando um ArrayList dos ids de entrada
+        ArrayList<String> ids = new ArrayList<>();
+        // Capturando os ids de entrada
+        while (!entrada.equals("FIM")) {
+            ids.add(entrada);
             entrada = sc.nextLine();
         }
-
-        Game[] gamesList = JogosDigitados.inicializacao(ids, idsTamanho);
-        int gamesListTamanho = JogosDigitados.obterTamanhoGamesList();
-
-        long tempoInicio = System.currentTimeMillis();
-        gamesList = ordenacaoHeapSort(gamesList, gamesListTamanho);
-        long tempoFim = System.currentTimeMillis();
-        HLogMetrics.tempoExecucaoMs = tempoFim - tempoInicio;
-
-        printando(gamesList, gamesListTamanho);
-        HLogMetrics.gerarLog();
-
+        // Criando o ArrayList apenas com os jogos digitados
+        ArrayList<Game> gamesList = JogosDigitados.inicializacao(ids);
+        // Ordenando
+        gamesList = ordenacaoHeapSort(gamesList);
+        // Printando o Array
+        printando(gamesList);
+        // Fechando o scanner
         sc.close();
     }
 
-    static Game[] ordenacaoHeapSort(Game[] gameList, int tam) {
-        Game[] tmp = new Game[tam + 1];
+    static ArrayList<Game> ordenacaoHeapSort(ArrayList<Game> gameList) {
+        int tam = gameList.size();
+        ArrayList<Game> tmp = new ArrayList<>();
+        tmp.add(null);
         for (int i = 0; i < tam; i++) {
-            tmp[i + 1] = gameList[i];
+            tmp.add(gameList.get(i));
         }
         gameList = tmp;
 
@@ -154,20 +102,19 @@ public class HeapSort {
             reconstruir(1, tamHeap, gameList);
         }
 
-        Game[] tmp2 = new Game[tam];
+        tmp = gameList;
+        ArrayList<Game> tmp2 = new ArrayList<>();
         for (int i = 0; i < tam; i++) {
-            tmp2[i] = gameList[i + 1];
+            tmp2.add(tmp.get(i + 1));
         }
         gameList = tmp2;
-
         return gameList;
     }
 
-    static void reconstruir(int i, int tamHeap, Game[] gameList) {
+    static void reconstruir(int i, int tamHeap, ArrayList<Game> gameList) {
         int filho;
         while (i <= (tamHeap / 2)) {
             filho = getMaiorFilho(i, tamHeap, gameList);
-            HLogMetrics.comparacoes++;
             if (maiores(gameList, filho, i)) {
                 swap(i, filho, gameList);
                 i = filho;
@@ -177,72 +124,75 @@ public class HeapSort {
         }
     }
 
-    static int getMaiorFilho(int i, int tamHeap, Game[] gameList) {
+    static int getMaiorFilho(int i, int tamHeap, ArrayList<Game> gameList) {
         int filho;
         int filhoEsquerdo = 2 * i;
         int filhoDireito = 2 * i + 1;
         if (filhoDireito > tamHeap) {
             filho = filhoEsquerdo;
+        } else if (maiores(gameList, filhoDireito, filhoEsquerdo)) {
+            filho = filhoDireito;
         } else {
-            HLogMetrics.comparacoes++;
-            if (maiores(gameList, filhoDireito, filhoEsquerdo)) {
-                filho = filhoDireito;
-            } else {
-                filho = filhoEsquerdo;
-            }
+            filho = filhoEsquerdo;
         }
+
         return filho;
     }
 
-    static void swap(int p1, int p2, Game[] gameList) {
-        Game aux = gameList[p2];
-        gameList[p2] = gameList[p1];
-        gameList[p1] = aux;
-        HLogMetrics.movimentacoes += 3;
+    static void swap(int p1, int p2, ArrayList<Game> gameList) {
+        Game aux = gameList.get(p2);
+        gameList.set(p2, gameList.get(p1));
+        gameList.set(p1, aux);
     }
 
-    static boolean maiores(Game[] gameList, int p1, int p2) {
-        if (gameList[p1].estimatedOwners > gameList[p2].estimatedOwners) {
+    static boolean maiores(ArrayList<Game> gameList, int p1, int p2) {
+
+        if (gameList.get(p1).estimatedOwners > gameList.get(p2).estimatedOwners) {
             return true;
-        } else if (gameList[p1].estimatedOwners == gameList[p2].estimatedOwners) {
-            return gameList[p1].id > gameList[p2].id;
+        } else if (gameList.get(p1).estimatedOwners == gameList.get(p2).estimatedOwners) {
+            return gameList.get(p1).id > gameList.get(p2).id;
         }
-        return false;
+
+        return false; // P1 não é maior que P2
     }
 
-    static void printando(Game[] jogosOrdenados, int tamanho) {
-        for (int i = 0; i < tamanho; i++) {
-            String releaseDate = (jogosOrdenados[i].releaseDate.charAt(1) == '/'
-                    ? "0" + jogosOrdenados[i].releaseDate
-                    : jogosOrdenados[i].releaseDate);
+    // Printando de forma ordenada
+    static void printando(ArrayList<Game> jogosOrdenados) {
+        for (int i = 0; i < jogosOrdenados.size(); i++) {
+            String releaseDate = (jogosOrdenados.get(i).releaseDate.charAt(1) == '/'
+                    ? "0" + jogosOrdenados.get(i).releaseDate
+                    : jogosOrdenados.get(i).releaseDate);
             System.out.println(
-                    "=> " + jogosOrdenados[i].id + " ## " + jogosOrdenados[i].name + " ## " + releaseDate
-                            + " ## " + jogosOrdenados[i].estimatedOwners + " ## " + jogosOrdenados[i].price
-                            + " ## "
-                            + printArray(jogosOrdenados[i].supportedLanguages,
-                                    jogosOrdenados[i].supportedLanguagesCount)
-                            + " ## " + jogosOrdenados[i].metacriticScore + " ## " + jogosOrdenados[i].userScore
-                            + " ## " + jogosOrdenados[i].achievements
-                            + " ## " + printArray(jogosOrdenados[i].publishers, jogosOrdenados[i].publishersCount)
-                            + " ## " + printArray(jogosOrdenados[i].developers, jogosOrdenados[i].developersCount)
-                            + " ## " + printArray(jogosOrdenados[i].categories, jogosOrdenados[i].categoriesCount)
-                            + " ## " + printArray(jogosOrdenados[i].genres, jogosOrdenados[i].genresCount)
-                            + " ## "
-                            + (jogosOrdenados[i].tagsCount == 0 ? ""
-                                    : printArray(jogosOrdenados[i].tags, jogosOrdenados[i].tagsCount))
-                            + (jogosOrdenados[i].tagsCount == 0 ? "" : " ##"));
+                    "=> " + jogosOrdenados.get(i).id + " ## " + jogosOrdenados.get(i).name + " ## " + releaseDate
+                            + " ## " + jogosOrdenados.get(i).estimatedOwners + " ## " + jogosOrdenados.get(i).price
+                            + " ## " + printArray(jogosOrdenados.get(i).supportedLanguages)
+                            + " ## " + jogosOrdenados.get(i).metacriticScore + " ## " + jogosOrdenados.get(i).userScore
+                            + " ## " + jogosOrdenados.get(i).achievements
+                            + " ## " + printArray(jogosOrdenados.get(i).publishers)
+                            + " ## " + printArray(jogosOrdenados.get(i).developers)
+                            + " ## " + printArray(jogosOrdenados.get(i).categories)
+                            + " ## " + printArray(jogosOrdenados.get(i).genres)
+                            + " ## " + (jogosOrdenados.get(i).tags.isEmpty() ? "" : printArray(jogosOrdenados.get(i).tags))
+                            + (jogosOrdenados.get(i).tags.isEmpty() ? "" : " ##"));
         }
     }
 
-    static String printArray(String[] array, int tamanho) {
+    // Printando o ArrayList
+    static String printArray(ArrayList<String> teste) {
         String resultado = "";
-        if (tamanho == 0)
+
+        // Se a lista estiver vazia, retorna "[]"
+        if (teste.isEmpty()) {
             return "[]";
+        }
+
+        // Se não estiver vazia, formata a lista
         resultado += "[";
-        for (int i = 0; i < tamanho; i++) {
-            resultado += array[i];
-            if (i < tamanho - 1)
+        for (int i = 0; i < teste.size(); i++) {
+            resultado += teste.get(i);
+            if (i < teste.size() - 1) {
                 resultado += ", ";
+            }
         }
         resultado += "]";
         return resultado;
@@ -255,120 +205,71 @@ class JogosDigitados {
     public static Scanner sc;
     // Variável que pula caracteres das linhas
     static int contador = 0;
-    // Ids de pesquisa e seu tamanho
-    static String[] ids;
-    static int idsTamanho;
-    // Lista de jogos encontrados e seu tamanho
-    static Game[] gamesList;
-    static int gamesListTamanho;
-
-    // Função para obter o tamanho final da lista de jogos
-    public static int obterTamanhoGamesList() {
-        return gamesListTamanho;
-    }
+    // Ids de pesquisa
+    static ArrayList<String> ids = new ArrayList<>();
 
     // Capturando os jogos
-    static Game[] inicializacao(String[] idArray, int tamanho) {
-        // Array de jogos
-        gamesList = new Game[NoArrayList.MAX_GAMES];
-        gamesListTamanho = 0;
-
+    static ArrayList<Game> inicializacao(ArrayList<String> idArray) {
+        // Array
+        ArrayList<Game> gamesList = new ArrayList<>();
         // Copiando IDs para a variável de classe 'ids'
-        ids = idArray;
-        idsTamanho = tamanho;
-
+        ids.clear();
+        ids.addAll(idArray);
         // Abrindo do arquivo
         InputStream is = null;
         try {
-            java.io.File arquivo = new java.io.File("/tmp/games.csv");
-            if (!arquivo.exists()) {
-                System.out.println("Arquivo 'games.csv' não encontrado!");
-                return gamesList;
-            }
-            is = new FileInputStream(arquivo);
+            is = new FileInputStream("/tmp/games.csv");
         } catch (Exception e) {
-            System.out.println("Erro ao abrir o arquivo: " + e.getMessage());
+            System.out.println("Arquivo não encontrado!");
             return gamesList;
         }
-
         sc = new Scanner(is);
         // Pula cabeçalho
         if (sc.hasNextLine())
             sc.nextLine();
-
         // Pesquisa por id
-        while (sc.hasNextLine() && idsTamanho > 0 && gamesListTamanho < gamesList.length) {
+        while (sc.hasNextLine() && ids.size() > 0) {
             String linha = sc.nextLine();
             // Resetando o contador para a nova linha
             contador = 0;
             // Capturando outras informações
             int id = capturaId(linha);
-
-            int indiceEncontrado = igualId(id);
-            if (indiceEncontrado != -1) {
+            if (igualId(id)) {
                 String name = capturaName(linha);
                 String releaseDate = capturaReleaseDate(linha);
                 int estimatedOwners = capturaEstimatedOwners(linha);
                 float price = capturaPrice(linha);
-
-                String[] supportedLanguages = new String[NoArrayList.MAX_INNER_ARRAY];
-                int supportedLanguagesCount = capturaSupportedLanguages(linha, supportedLanguages);
+                ArrayList<String> supportedLanguages = capturaSupportedLanguages(linha);
                 int metacriticScore = capturaMetacriticScore(linha);
                 float userScore = capturaUserScore(linha);
                 int achievements = capturaAchievements(linha);
-
-                String[] publishers = new String[NoArrayList.MAX_INNER_ARRAY];
-                int publishersCount = capturaUltimosArryays(linha, publishers);
-                String[] developers = new String[NoArrayList.MAX_INNER_ARRAY];
-                int developersCount = capturaUltimosArryays(linha, developers);
-                String[] categories = new String[NoArrayList.MAX_INNER_ARRAY];
-                int categoriesCount = capturaUltimosArryays(linha, categories);
-                String[] genres = new String[NoArrayList.MAX_INNER_ARRAY];
-                int genresCount = capturaUltimosArryays(linha, genres);
-                String[] tags = new String[NoArrayList.MAX_INNER_ARRAY];
-                int tagsCount = capturaUltimosArryays(linha, tags);
-
+                ArrayList<String> publishers = capturaUltimosArryays(linha);
+                ArrayList<String> developers = capturaUltimosArryays(linha);
+                ArrayList<String> categories = capturaUltimosArryays(linha);
+                ArrayList<String> genres = capturaUltimosArryays(linha);
+                ArrayList<String> tags = capturaUltimosArryays(linha);
                 // Adicionando a classe
                 Game jogo = new Game(id, name, releaseDate, estimatedOwners, price,
-                        supportedLanguages, supportedLanguagesCount, metacriticScore, userScore, achievements,
-                        publishers, publishersCount, developers, developersCount, categories, categoriesCount, genres,
-                        genresCount, tags, tagsCount);
-                gamesList[gamesListTamanho++] = jogo;
-                removerId(indiceEncontrado);
+                        supportedLanguages, metacriticScore, userScore, achievements,
+                        publishers, developers, categories, genres, tags);
+                gamesList.add(jogo);
+                // O contador já é resetado ao sair do if, mas vou manter o reset aqui por
+                // segurança
+                // contador = 0;
             }
         }
-        sc.close();
-
-        // Redimensiona o array final para o tamanho real, mantendo a lógica do seu
-        // código original
-        Game[] resultadoFinal = new Game[gamesListTamanho];
-        for (int i = 0; i < gamesListTamanho; i++) {
-            resultadoFinal[i] = gamesList[i];
-        }
-        gamesList = resultadoFinal;
-
-        return resultadoFinal;
+        return gamesList;
     }
 
     // Vendo se id é igual
-    static int igualId(int id) {
-        for (int i = 0; i < idsTamanho; i++) {
-            if (Integer.parseInt(ids[i]) == id) {
-                return i;
+    static boolean igualId(int id) {
+        for (int i = 0; i < ids.size(); i++) {
+            if (Integer.parseInt(ids.get(i)) == id) {
+                ids.remove(i);
+                return true;
             }
         }
-        return -1;
-    }
-
-    // Função para remover o ID da lista de pesquisa
-    static void removerId(int indice) {
-        if (indice >= 0 && indice < idsTamanho) {
-            for (int j = indice; j < idsTamanho - 1; j++) {
-                ids[j] = ids[j + 1];
-            }
-            ids[idsTamanho - 1] = null; // Limpa a última posição
-            idsTamanho--; // Decrementa o tamanho
-        }
+        return false;
     }
 
     // Capturando Id
@@ -512,9 +413,9 @@ class JogosDigitados {
     }
 
     // Capturando idiomas
-    static int capturaSupportedLanguages(String jogo, String[] supportedLanguages) {
-        int count = 0;
-        while (contador < jogo.length() && jogo.charAt(contador) != ']' && count < supportedLanguages.length) {
+    static ArrayList<String> capturaSupportedLanguages(String jogo) {
+        ArrayList<String> supportedLanguages = new ArrayList<>();
+        while (contador < jogo.length() && jogo.charAt(contador) != ']') {
             String lingua = "";
             while (contador < jogo.length() && !Character.isAlphabetic(jogo.charAt(contador))) {
                 contador++;
@@ -526,9 +427,9 @@ class JogosDigitados {
                 }
                 contador++;
             }
-            supportedLanguages[count++] = lingua;
+            supportedLanguages.add(lingua);
         }
-        return count; // Retorna o tamanho real
+        return supportedLanguages;
     }
 
     // Capturando Metacritic Score
@@ -582,9 +483,9 @@ class JogosDigitados {
             return Integer.parseInt(achievements);
     }
 
-    // Capturando Últimos Arrays
-    static int capturaUltimosArryays(String jogo, String[] categoria) {
-        int count = 0;
+    // Capturando Últimos Arrays [505 Games]
+    static ArrayList<String> capturaUltimosArryays(String jogo) {
+        ArrayList<String> categoria = new ArrayList<>();
         boolean teste = false;
         while (contador < jogo.length() && !Character.isAlphabetic(jogo.charAt(contador))
                 && !Character.isDigit(jogo.charAt(contador))) {
@@ -593,7 +494,7 @@ class JogosDigitados {
             contador++;
         }
         if (teste) {
-            while (contador < jogo.length() && jogo.charAt(contador) != '"' && count < categoria.length) {
+            while (contador < jogo.length() && jogo.charAt(contador) != '"') {
                 String parte = "";
                 while (contador < jogo.length() && jogo.charAt(contador) != ',' && jogo.charAt(contador) != '"') {
                     parte += jogo.charAt(contador);
@@ -604,23 +505,16 @@ class JogosDigitados {
                         && jogo.charAt(contador) != '"') {
                     contador++;
                 }
-                categoria[count++] = parte; // Adiciona ao array e incrementa o contador
+                categoria.add(parte);
             }
-            contador++;
         } else {
-            if (count < categoria.length) {
-                String parte = "";
-                while (contador < jogo.length() && jogo.charAt(contador) != ',') {
-                    parte += jogo.charAt(contador);
-                    contador++;
-                }
-                categoria[count++] = parte; // Adiciona ao array e incrementa o contador
+            String parte = "";
+            while (contador < jogo.length() && jogo.charAt(contador) != ',') {
+                parte += jogo.charAt(contador);
+                contador++;
             }
+            categoria.add(parte);
         }
-        // Pula a vírgula depois do array (se houver)
-        if (contador < jogo.length() && jogo.charAt(contador) == ',') {
-            contador++;
-        }
-        return count; // Retorna o tamanho real
+        return categoria;
     }
 }

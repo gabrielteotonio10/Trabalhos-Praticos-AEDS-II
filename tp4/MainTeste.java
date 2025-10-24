@@ -1,6 +1,4 @@
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.IOException;
+package tp4;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Scanner;
@@ -87,25 +85,7 @@ class Game {
     }
 }
 
-class HLogMetrics {
-    public static long comparacoes = 0;
-    public static long movimentacoes = 0;
-    public static long tempoExecucaoMs = 0;
-    public static final String MATRICULA = "885732";
-
-    public static void gerarLog() {
-        try {
-            FileWriter arq = new FileWriter(MATRICULA + "_heapsort.txt");
-            PrintWriter gravarArq = new PrintWriter(arq);
-            gravarArq.println(MATRICULA + "\t" + comparacoes + "\t" + movimentacoes + "\t" + tempoExecucaoMs);
-            gravarArq.close();
-        } catch (IOException e) {
-            System.out.println("Erro ao criar log: " + e.getMessage());
-        }
-    }
-}
-
-public class HeapSortSemArrayList {
+public class MainTeste {
     public static Scanner sc;
 
     public static void main(String[] args) {
@@ -125,89 +105,9 @@ public class HeapSortSemArrayList {
         Game[] gamesList = JogosDigitados.inicializacao(ids, idsTamanho);
         int gamesListTamanho = JogosDigitados.obterTamanhoGamesList();
 
-        long tempoInicio = System.currentTimeMillis();
-        gamesList = ordenacaoHeapSort(gamesList, gamesListTamanho);
-        long tempoFim = System.currentTimeMillis();
-        HLogMetrics.tempoExecucaoMs = tempoFim - tempoInicio;
-
         printando(gamesList, gamesListTamanho);
-        HLogMetrics.gerarLog();
 
         sc.close();
-    }
-
-    static Game[] ordenacaoHeapSort(Game[] gameList, int tam) {
-        Game[] tmp = new Game[tam + 1];
-        for (int i = 0; i < tam; i++) {
-            tmp[i + 1] = gameList[i];
-        }
-        gameList = tmp;
-
-        for (int i = tam / 2; i >= 1; i--) {
-            reconstruir(i, tam, gameList);
-        }
-
-        int tamHeap = tam;
-        while (tamHeap > 1) {
-            swap(1, tamHeap, gameList);
-            tamHeap--;
-            reconstruir(1, tamHeap, gameList);
-        }
-
-        Game[] tmp2 = new Game[tam];
-        for (int i = 0; i < tam; i++) {
-            tmp2[i] = gameList[i + 1];
-        }
-        gameList = tmp2;
-
-        return gameList;
-    }
-
-    static void reconstruir(int i, int tamHeap, Game[] gameList) {
-        int filho;
-        while (i <= (tamHeap / 2)) {
-            filho = getMaiorFilho(i, tamHeap, gameList);
-            HLogMetrics.comparacoes++;
-            if (maiores(gameList, filho, i)) {
-                swap(i, filho, gameList);
-                i = filho;
-            } else {
-                break;
-            }
-        }
-    }
-
-    static int getMaiorFilho(int i, int tamHeap, Game[] gameList) {
-        int filho;
-        int filhoEsquerdo = 2 * i;
-        int filhoDireito = 2 * i + 1;
-        if (filhoDireito > tamHeap) {
-            filho = filhoEsquerdo;
-        } else {
-            HLogMetrics.comparacoes++;
-            if (maiores(gameList, filhoDireito, filhoEsquerdo)) {
-                filho = filhoDireito;
-            } else {
-                filho = filhoEsquerdo;
-            }
-        }
-        return filho;
-    }
-
-    static void swap(int p1, int p2, Game[] gameList) {
-        Game aux = gameList[p2];
-        gameList[p2] = gameList[p1];
-        gameList[p1] = aux;
-        HLogMetrics.movimentacoes += 3;
-    }
-
-    static boolean maiores(Game[] gameList, int p1, int p2) {
-        if (gameList[p1].estimatedOwners > gameList[p2].estimatedOwners) {
-            return true;
-        } else if (gameList[p1].estimatedOwners == gameList[p2].estimatedOwners) {
-            return gameList[p1].id > gameList[p2].id;
-        }
-        return false;
     }
 
     static void printando(Game[] jogosOrdenados, int tamanho) {
