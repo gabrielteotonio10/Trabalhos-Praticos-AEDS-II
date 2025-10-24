@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <time.h>
 
-//Constantes para tamanhos de buffers
 #define MAX_LINE_SIZE 4096
 #define MAX_FIELD_SIZE 512
 #define MAX_ARRAY_ELEMENTS 50
@@ -54,7 +53,6 @@ int main() {
     char lineBuffer[MAX_LINE_SIZE];
     const char* filePath = "/tmp/games.csv";
     
-    // Etapa 1: Contar as linhas do arquivo para alocar memória
     FILE* file = fopen(filePath, "r");
     if (file == NULL) {
         perror("Erro ao abrir o arquivo");
@@ -62,13 +60,12 @@ int main() {
     }
     
     int gameCount = 0;
-    fgets(lineBuffer, MAX_LINE_SIZE, file); // Pula o cabeçalho
+    fgets(lineBuffer, MAX_LINE_SIZE, file); 
     while (fgets(lineBuffer, MAX_LINE_SIZE, file) != NULL) {
         gameCount++;
     }
     fclose(file);
 
-    // Etapa 2: Alocar memória para todos os jogos e carregá-los
     Game* allGames = (Game*) malloc(sizeof(Game) * gameCount);
     if (allGames == NULL) {
         printf("Erro de alocação de memória\n");
@@ -82,7 +79,7 @@ int main() {
         return 1;
     }
 
-    fgets(lineBuffer, MAX_LINE_SIZE, file); // Pula o cabeçalho novamente
+    fgets(lineBuffer, MAX_LINE_SIZE, file); 
     int i = 0;
     while (fgets(lineBuffer, MAX_LINE_SIZE, file) != NULL) {
         parseAndLoadGame(&allGames[i], lineBuffer);
@@ -90,13 +87,12 @@ int main() {
     }
     fclose(file);
 
-    // Etapa 3: Ler IDs da entrada padrão e buscar
     char inputId[MAX_FIELD_SIZE];
     Game* gamesParaOrdenar = (Game*) malloc(sizeof(Game) * gameCount);
     int countParaOrdenar = 0;
     
     while (fgets(inputId, MAX_FIELD_SIZE, stdin) != NULL) {
-        inputId[strcspn(inputId, "\n")] = 0; // Remove a quebra de linha
+        inputId[strcspn(inputId, "\n")] = 0; 
         if (strcmp(inputId, "FIM") == 0) {
             break;
         }
@@ -104,7 +100,6 @@ int main() {
         int targetId = atoi(inputId);
         for (i = 0; i < gameCount; i++) {
             if (allGames[i].id == targetId) {
-                // Copia o jogo encontrado para o array de ordenação
                 gamesParaOrdenar[countParaOrdenar] = allGames[i];
                 countParaOrdenar++;
                 break;
@@ -112,22 +107,17 @@ int main() {
         }
     }
 
-    // Etapa 4: Ordenar os jogos pelo nome usando Selection Sort
     clock_t inicio = clock();
     selectionSort(gamesParaOrdenar, countParaOrdenar);
     clock_t fim = clock();
     double tempo = ((double)(fim - inicio)) / CLOCKS_PER_SEC;
 
-    // Etapa 5: Imprimir jogos ordenados
     for (i = 0; i < countParaOrdenar; i++) {
         printGame(&gamesParaOrdenar[i]);
     }
 
-    // Etapa 6: Criar arquivo de log
     criarLog("885732", comparacoes, movimentacoes, tempo);
 
-    // Etapa 7: Liberar toda a memória alocada
-    // Não liberamos os jogos individuais aqui pois eles são cópias dos jogos originais
     free(gamesParaOrdenar);
     
     for (i = 0; i < gameCount; i++) {
@@ -188,8 +178,8 @@ void parseAndLoadGame(Game* game, char* line) {
     free(priceStr);
 
     char* langStr = getNextField(line, &pos);
-    langStr[strcspn(langStr, "]")] = 0; // Remove a partir de ']'
-    memmove(langStr, langStr + 1, strlen(langStr)); // Remove '[' e '\''
+    langStr[strcspn(langStr, "]")] = 0; 
+    memmove(langStr, langStr + 1, strlen(langStr)); 
     for(int i = 0; langStr[i]; i++) if(langStr[i] == '\'') langStr[i] = ' ';
     game->supportedLanguages = splitString(langStr, ',', &game->supportedLanguagesCount);
     free(langStr);
