@@ -1,5 +1,3 @@
-package tp5;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
@@ -77,87 +75,85 @@ public class HeapSort {
         // Criando o ArrayList apenas com os jogos digitados
         ArrayList<Game> gamesList = JogosDigitados.inicializacao(ids);
         // Ordenando
-        ordenacaoHeapSort(gamesList);
+        gamesList = ordenacaoHeapSort(gamesList);
         // Printando o Array
         printando(gamesList);
         // Fechando o scanner
         sc.close();
     }
 
-    public static boolean isMaior(Game a, Game b) {
-        if (a.estimatedOwners != b.estimatedOwners) {
-            return a.estimatedOwners > b.estimatedOwners;
-        }
-        return a.id < b.id;
-    }
-
-    public static void ordenacaoHeapSort(ArrayList<Game> gameList) {
-        int n = gameList.size();
-        
-        ArrayList<Game> tmp = new ArrayList<>(n + 1);
-        tmp.add(null); // Posição 0 (nula)
-        for (int i = 0; i < n; i++) {
+    static ArrayList<Game> ordenacaoHeapSort(ArrayList<Game> gameList) {
+        int tam = gameList.size();
+        ArrayList<Game> tmp = new ArrayList<>();
+        tmp.add(null);
+        for (int i = 0; i < tam; i++) {
             tmp.add(gameList.get(i));
         }
+        gameList = tmp;
 
-        // Contrucao do heap
-        for (int tamHeap = 2; tamHeap <= n; tamHeap++) {
-            construir(tamHeap, tmp);
+        for (int i = tam / 2; i >= 1; i--) {
+            reconstruir(i, tam, gameList);
         }
 
-        // Ordenacao propriamente dita
-        int tamHeap = n;
+        int tamHeap = tam;
         while (tamHeap > 1) {
-            swap(1, tamHeap--, tmp);
-            reconstruir(tamHeap, tmp);
+            swap(1, tamHeap, gameList);
+            tamHeap--;
+            reconstruir(1, tamHeap, gameList);
         }
-        
-        gameList.clear();
-        for (int i = 1; i <= n; i++) {
-            gameList.add(tmp.get(i));
+
+        tmp = gameList;
+        ArrayList<Game> tmp2 = new ArrayList<>();
+        for (int i = 0; i < tam; i++) {
+            tmp2.add(tmp.get(i + 1));
         }
+        gameList = tmp2;
+        return gameList;
     }
 
-    public static void construir(int tamHeap, ArrayList<Game> gameList) {
-        // Usa isMaior para critério de ordenação e desempate
-        for (int i = tamHeap; i > 1 && isMaior(gameList.get(i), gameList.get(i / 2)); i /= 2) {
-            swap(i, i / 2, gameList);
-        }
-    }
-
-    public static void reconstruir(int tamHeap, ArrayList<Game> gameList) {
-        int i = 1;
+    static void reconstruir(int i, int tamHeap, ArrayList<Game> gameList) {
+        int filho;
         while (i <= (tamHeap / 2)) {
-            int filho = getMaiorFilho(i, tamHeap, gameList);
-            // Usa isMaior para critério de ordenação e desempate
-            if (isMaior(gameList.get(filho), gameList.get(i))) {
+            filho = getMaiorFilho(i, tamHeap, gameList);
+            if (maiores(gameList, filho, i)) {
                 swap(i, filho, gameList);
                 i = filho;
             } else {
-                i = tamHeap;
+                break;
             }
         }
     }
 
-    public static int getMaiorFilho(int i, int tamHeap, ArrayList<Game> gameList) {
+    static int getMaiorFilho(int i, int tamHeap, ArrayList<Game> gameList) {
         int filho;
-        // Verifica se só tem filho esquerdo
-        if (2 * i == tamHeap) {
-            filho = 2 * i;
-        } 
-        // Usa isMaior para verificar qual filho é maior (ou desempata)
-        else if (isMaior(gameList.get(2 * i), gameList.get(2 * i + 1))) {
-            filho = 2 * i;
+        int filhoEsquerdo = 2 * i;
+        int filhoDireito = 2 * i + 1;
+        if (filhoDireito > tamHeap) {
+            filho = filhoEsquerdo;
+        } else if (maiores(gameList, filhoDireito, filhoEsquerdo)) {
+            filho = filhoDireito;
         } else {
-            filho = 2 * i + 1;
+            filho = filhoEsquerdo;
         }
+
         return filho;
     }
 
-    public static void swap(int i, int j, ArrayList<Game> gameList) {
-        Game temp = gameList.get(i);
-        gameList.set(i, gameList.get(j));
-        gameList.set(j, temp);
+    static void swap(int p1, int p2, ArrayList<Game> gameList) {
+        Game aux = gameList.get(p2);
+        gameList.set(p2, gameList.get(p1));
+        gameList.set(p1, aux);
+    }
+
+    static boolean maiores(ArrayList<Game> gameList, int p1, int p2) {
+
+        if (gameList.get(p1).estimatedOwners > gameList.get(p2).estimatedOwners) {
+            return true;
+        } else if (gameList.get(p1).estimatedOwners == gameList.get(p2).estimatedOwners) {
+            return gameList.get(p1).id > gameList.get(p2).id;
+        }
+
+        return false; // P1 não é maior que P2
     }
 
     // Printando de forma ordenada
@@ -176,26 +172,31 @@ public class HeapSort {
                             + " ## " + printArray(jogosOrdenados.get(i).developers)
                             + " ## " + printArray(jogosOrdenados.get(i).categories)
                             + " ## " + printArray(jogosOrdenados.get(i).genres)
-                            + " ## " + printArray(jogosOrdenados.get(i).tags)
-                            + " ##");
+                            + " ## " + (jogosOrdenados.get(i).tags.isEmpty() ? "" : printArray(jogosOrdenados.get(i).tags))
+                            + (jogosOrdenados.get(i).tags.isEmpty() ? "" : " ##"));
         }
     }
 
     // Printando o ArrayList
     static String printArray(ArrayList<String> teste) {
-        StringBuilder sb = new StringBuilder();
-        if (teste.size() > 0)
-            sb.append("[");
-        for (int i = 0; i < teste.size(); i++) {
-            sb.append(teste.get(i));
-            if (i < teste.size() - 1)
-                sb.append(", ");
-        }
-        if (teste.size() > 0)
-            sb.append("]");
-        return sb.toString();
-    }
+        String resultado = "";
 
+        // Se a lista estiver vazia, retorna "[]"
+        if (teste.isEmpty()) {
+            return "[]";
+        }
+
+        // Se não estiver vazia, formata a lista
+        resultado += "[";
+        for (int i = 0; i < teste.size(); i++) {
+            resultado += teste.get(i);
+            if (i < teste.size() - 1) {
+                resultado += ", ";
+            }
+        }
+        resultado += "]";
+        return resultado;
+    }
 }
 
 // Capturando os jogos digitados através do id pelo usuário
@@ -230,7 +231,7 @@ class JogosDigitados {
         while (sc.hasNextLine() && ids.size() > 0) {
             String linha = sc.nextLine();
             // Resetando o contador para a nova linha
-            contador = 0; 
+            contador = 0;
             // Capturando outras informações
             int id = capturaId(linha);
             if (igualId(id)) {
@@ -252,8 +253,9 @@ class JogosDigitados {
                         supportedLanguages, metacriticScore, userScore, achievements,
                         publishers, developers, categories, genres, tags);
                 gamesList.add(jogo);
-                // O contador já é resetado ao sair do if, mas vou manter o reset aqui por segurança
-                // contador = 0; 
+                // O contador já é resetado ao sair do if, mas vou manter o reset aqui por
+                // segurança
+                // contador = 0;
             }
         }
         return gamesList;
