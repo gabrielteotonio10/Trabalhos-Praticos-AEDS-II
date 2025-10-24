@@ -157,7 +157,7 @@ void swap(Game* a, Game* b) {
 
 // Função para criar arquivo de log
 void criarLog(const char* matricula, int comp, int mov, double tempo) {
-    FILE* logFile = fopen("suamatricula_selecao.txt", "w");
+    FILE* logFile = fopen("885732_selecao.txt", "w");
     if (logFile != NULL) {
         fprintf(logFile, "%s\t%d\t%d\t%f\n", matricula, comp, mov, tempo);
         fclose(logFile);

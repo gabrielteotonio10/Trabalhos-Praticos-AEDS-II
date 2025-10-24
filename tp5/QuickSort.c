@@ -120,7 +120,7 @@ int main() {
         printGame(&gamesParaOrdenar[i]);
     }
 
-    criarLog("SUA_MATRICULA", comparacoes, movimentacoes, tempo);
+    criarLog("885732", comparacoes, movimentacoes, tempo);
 
     free(gamesParaOrdenar);
     
@@ -199,7 +199,7 @@ void quicksort(Game* games, int esq, int dir) {
 
 // Função para criar arquivo de log
 void criarLog(const char* matricula, int comp, int mov, double tempo) {
-    FILE* logFile = fopen("suamatricula_quicksort.txt", "w");
+    FILE* logFile = fopen("885732_quicksort.txt", "w");
     if (logFile != NULL) {
         fprintf(logFile, "%s\t%d\t%d\t%f\n", matricula, comp, mov, tempo);
         fclose(logFile);
