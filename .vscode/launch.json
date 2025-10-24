@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "MergeSort",
+      "request": "launch",
+      "mainClass": "MergeSort",
+      "projectName": "Trabalhos-Praticos-AEDS-II_e3243a9b"
+    },
+    {
+      "type": "java",
       "name": "HeapSort",
       "request": "launch",
       "mainClass": "tp5.HeapSort",
