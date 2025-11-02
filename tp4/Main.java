@@ -1,4 +1,4 @@
-package tp4;
+vpackage tp4;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;

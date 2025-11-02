@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "listaAlocacaoSequencial",
+      "request": "launch",
+      "mainClass": "tp6.listaAlocacaoSequencial",
+      "projectName": "Trabalhos-Praticos-AEDS-II_e3243a9b"
+    },
+    {
+      "type": "java",
       "name": "HeapSortSemArrayList",
       "request": "launch",
       "mainClass": "HeapSortSemArrayList",
